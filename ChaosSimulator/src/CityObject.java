@@ -5,6 +5,8 @@ import java.util.Arrays;
 public class CityObject {
 	private int x;
 	private int y;
+	private int xPos;
+	private int yPos;
 	private ArrayList<CityObject> neighbours;
 	private FierynessLevel fierynessLevel;
 	private int id;
@@ -24,18 +26,35 @@ public class CityObject {
 	}
 	
 	public CityObject(int x, int y){
-		this.x = x*Camera.SCALE;
-		this.y = y*Camera.SCALE;
+		this.x = x;
+		this.y = y;
+		xPos = x*Camera.scale;
+		yPos = y*Camera.scale;
 		neighbours = new ArrayList<CityObject>();
 		this.id = CityDataReader.IDCount++;
 	}
 	
-	public int getX(){
-		return this.x;
+	public int getXPos(){
+		return this.xPos;
 	}
 	
-	public int getY(){
-		return this.y;
+	public int getYPos(){
+		return this.yPos;
+	}
+	
+	public void setX(int x){
+		this.x = x;
+		this.xPos = x*Camera.scale;
+	}
+	
+	public void setY(int y){
+		this.y = y;
+		this.yPos = y*Camera.scale;
+	}
+	
+	public void updatePos(){
+		xPos = x*Camera.scale;
+		yPos = y*Camera.scale;
 	}
 	
 	public ArrayList<CityObject> getNeighbours() {

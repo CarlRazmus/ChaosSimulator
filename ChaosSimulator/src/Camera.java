@@ -1,22 +1,47 @@
 import java.awt.Color;
+import java.awt.Event;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
 public class Camera extends JComponent {
 	private static final long serialVersionUID = 1L;
-	
-	private int x;
-	private int y;
+
 	private WorldModel model;
 	private ArrayList<Agent> agents;
-	long time; 
-	public static int SCALE = 5;
+	
+	public static int scale = 7;
+	private int x = 0;
+	private int y = 0;
+	long time;
+	
+	
 	
 	public Camera(){
 		
 	}
+	
+	public void zoomIn(){
+		scale++;
+		model.updateScaleOnObjects();
+	}
+	public void zoomOut(){
+		scale--;
+		model.updateScaleOnObjects();
+	}
+	
+	public void moveRight(){
+		x += scale;
+		System.out.println("moving right");
+	}
+	public void moveLeft(){
+		x -= scale;
+		System.out.println("moving Left");
+	}
+	
 	
 	public Camera(ArrayList<Agent> agents){
 		this.agents = agents;
@@ -26,17 +51,17 @@ public class Camera extends JComponent {
 		Color oldColor = g.getColor();
 		g.setColor(Color.DARK_GRAY);
 		for (Building o : model.getBuildings()){
-				for(CityObject child : o.getBlocks())
-					g.fillRect(child.getX(), child.getY(), SCALE, SCALE);
+			for(CityObject child : o.getBlocks())
+				g.fillRect(x + child.getXPos(), y + child.getYPos(), scale, scale);
 		}
 		g.setColor(Color.LIGHT_GRAY);
 		for (Road road : model.getRoads()){
 			if(road.isBlocked()){
 				g.setColor(Color.green);
-				g.fillRect(road.getX(), road.getY(), SCALE, SCALE);
+				g.fillRect(x + road.getXPos(), y + road.getYPos(), scale, scale);
 				g.setColor(Color.LIGHT_GRAY);
 			}else
-				g.fillRect(road.getX(), road.getY(), SCALE, SCALE);
+				g.fillRect(x + road.getXPos(), y + road.getYPos(), scale, scale);
 		}
 		
 		for(Agent agent : agents){
@@ -45,18 +70,18 @@ public class Camera extends JComponent {
 				if(agent.getPath() != null){
 					g.setColor(Color.orange);
 					for(CityObject o : agent.getPath())
-						g.fillRect(o.getX(), o.getY(), SCALE, SCALE);
+						g.fillRect(x + o.getXPos(), y + o.getYPos(), scale, scale);
 					
 					g.setColor(Color.MAGENTA);
 					if(agent.getPathFinder().getDebugData() != null)
 						for(CityObject o : agent.getPathFinder().getDebugData())
-							g.fillRect(o.getX(), o.getY(), SCALE, SCALE);
+							g.fillRect(x + o.getXPos(), y + o.getYPos(), scale, scale);
 				}
 				g.setColor(Color.BLACK);
-				g.fillRect(agent.getTarget().getX(), agent.getTarget().getY(), SCALE, SCALE);
+				g.fillRect(x + agent.getTarget().getXPos(), y + agent.getTarget().getYPos(), scale, scale);
 			}
 			g.setColor(Color.RED);
-			g.fillRect(agent.getLocation().getX(), agent.getLocation().getY(), SCALE, SCALE);
+			g.fillRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), scale, scale);
 		}
 		debug(g);
 		g.setColor(oldColor);
@@ -72,7 +97,7 @@ public class Camera extends JComponent {
 	private void debugCrossings(Graphics g){
 		g.setColor(Color.blue);
 		for (CityObject cross : model.getCrossings())
-			g.drawString(Integer.toString(cross.getId()), cross.getX() + 5, cross.getY());
+			g.drawString(Integer.toString(cross.getId()), x + cross.getXPos() + 5, y + cross.getYPos());
 	}
 
 	/* show all crossings neighbour crossings */
@@ -100,4 +125,42 @@ public class Camera extends JComponent {
 	public void setAgents(ArrayList<Agent> agents) {
 		this.agents = agents;
 	}
+
+	
+	
+	
+	
+	
+	
+
+	
+	public void handleKeyEvent(KeyEvent e){
+		int key = e.getKeyCode();
+	
+	    if (key == KeyEvent.VK_LEFT) {
+	        moveLeft();
+	    }
+	
+	    if (key == KeyEvent.VK_RIGHT) {
+	    	moveRight();
+	    }
+	
+	    if (key == KeyEvent.VK_UP) {
+
+	    }
+	
+	    if (key == KeyEvent.VK_DOWN) {
+
+	    }
+		
+	    if (key == KeyEvent.VK_Z) {
+	    	zoomIn();
+	    }
+	    
+	    if (key == KeyEvent.VK_X) {
+	    	zoomOut();
+	    }	
+
+	}
+	
 }

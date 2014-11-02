@@ -13,6 +13,8 @@ public abstract class Agent extends CityObject {
 	// abstract methods
 	public abstract void think();
 
+	
+	
 	// Constructors
 	public Agent() {
 	}

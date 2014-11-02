@@ -116,20 +116,20 @@ public class CityDataReader {
 	}
 
 	private void findRoadNeighbours(Road road, Road neighbour) {
-		if (road.getX() == neighbour.getX()) {
-			if (neighbour.getY() == road.getY() - Camera.SCALE || neighbour.getY() == road.getY() + Camera.SCALE) {
+		if (road.getXPos() == neighbour.getXPos()) {
+			if (neighbour.getYPos() == road.getYPos() - Camera.scale || neighbour.getYPos() == road.getYPos() + Camera.scale) {
 				road.getNeighbours().add(neighbour);
 			}
-		} else if (road.getY() == neighbour.getY())
-			if (neighbour.getX() == road.getX() - Camera.SCALE || neighbour.getX() == road.getX() + Camera.SCALE)
+		} else if (road.getYPos() == neighbour.getYPos())
+			if (neighbour.getXPos() == road.getXPos() - Camera.scale || neighbour.getXPos() == road.getXPos() + Camera.scale)
 				road.getNeighbours().add(neighbour);
 	}
 
 	public boolean isNeighbour(BuildingBlock b, BuildingBlock neighbour) {
-		if (b.getX() == neighbour.getX())
-			return neighbour.getY() == b.getY() - Camera.SCALE || neighbour.getY() == b.getY() + Camera.SCALE;
-		else if (b.getY() == neighbour.getY())
-			return neighbour.getX() == b.getX() - Camera.SCALE || neighbour.getX() == b.getX() + Camera.SCALE;
+		if (b.getXPos() == neighbour.getXPos())
+			return neighbour.getYPos() == b.getYPos() - Camera.scale || neighbour.getYPos() == b.getYPos() + Camera.scale;
+		else if (b.getYPos() == neighbour.getYPos())
+			return neighbour.getXPos() == b.getXPos() - Camera.scale || neighbour.getXPos() == b.getXPos() + Camera.scale;
 		return false;
 	}
 	

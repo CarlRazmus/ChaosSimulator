@@ -20,4 +20,12 @@ public class Building extends CityObject{
 	public ArrayList<BuildingBlock> getBlocks () {
 		return buildingBlocks;
 	}
+	
+	@Override
+	public void updatePos() {
+		// TODO Auto-generated method stub
+		super.updatePos();
+		for(BuildingBlock block : buildingBlocks)
+			block.updatePos();
+	}
 }

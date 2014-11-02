@@ -181,8 +181,8 @@ public class RTAStar extends PathFinder {
 	
 	private double heuristic_cost(CityObject start, CityObject goal) {
 		// gets the bird-distance from start to goal
-		int xDiff = goal.getX() - start.getX();
-		int yDiff = goal.getY() - start.getY();
+		int xDiff = goal.getXPos() - start.getXPos();
+		int yDiff = goal.getYPos() - start.getYPos();
 		return Math.sqrt(yDiff*yDiff + xDiff*xDiff);
 	}
 

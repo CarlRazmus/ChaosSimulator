@@ -1,19 +1,22 @@
 import java.awt.BorderLayout;
 import java.awt.Label;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 
 
-public class Simulator {
+public class Simulator extends JFrame implements KeyListener {
 	private CityDataReader reader;
 	static protected WorldModel model;
 	private Camera camera;
 	private int frameHeight;
 	private int frameWidth;
 	private ArrayList<Agent> agents;
-	public static final int DEFAULT_SIZE = 5;
+//	public static final int DEFAULT_SIZE = 5;
 //	private final double FIRE_CHANCE_FACTOR = 0.5;
 	
 	public static void main(String[] args) {
@@ -61,6 +64,8 @@ public class Simulator {
 	}*/
 	
 	private void initialize(){
+		addKeyListener(this);
+		
 		agents = new ArrayList<Agent>();
 		reader = new CityDataReader();
 		model = new WorldModel();
@@ -75,29 +80,18 @@ public class Simulator {
 		camera.setModel(model);
 		camera.setAgents(agents);
 		
-		//1. Create the frame.
-		JFrame frame = new JFrame("Chaos Simulator");
-		
-		//2. Optional: What happens when the frame closes?
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		//3. Create components and put them in the frame.
-		//...create emptyLabel...
-		Label emptyLabel = new Label();
-		frame.getContentPane().add(emptyLabel, BorderLayout.CENTER);
-		
-		//4. Size the frame.
-		frame.pack();
-		
-		//5. Show it.
+
 		frameWidth = 800;//reader.getCityWidth()*SCALE + 20;
 		frameHeight = 600;//reader.getCityHeight()*SCALE + 20;
 		
-		frame.setVisible(true);
-		frame.setSize(frameWidth, frameHeight);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.pack();
+        this.setVisible(true);
+        this.setSize(frameWidth, frameHeight);
+		this.add(camera);
 		
-		frame.add(camera);
 		
+		// put up some blockades on the roads
 		model.getRoads().get(150).setBlocked(true);
 		model.getRoads().get(190).setBlocked(true);
 		model.getRoads().get(300).setBlocked(true);
@@ -109,12 +103,15 @@ public class Simulator {
 		model.getRoads().get(750).setBlocked(true);
 		model.getRoads().get(998).setBlocked(true);
 		
+
+		requestFocus();
+		
 		long time = System.currentTimeMillis();
 		while(true){
 			if(System.currentTimeMillis() > time + 150){
 				simulate();
 				time = System.currentTimeMillis();
-				frame.repaint();	
+				this.repaint();	
 			}
 		}
 	}
@@ -124,5 +121,22 @@ public class Simulator {
 		for (Agent agent : agents){
 			agent.think();
 		}
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		camera.handleKeyEvent(e);
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("HAHAHAHAHAHAHAHAH");
 	}
 }

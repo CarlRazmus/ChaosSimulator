@@ -13,6 +13,13 @@ public class WorldModel {
 		initialize();
 	}
 	
+	public void updateScaleOnObjects(){
+		for(Building b : buildings)
+			b.updatePos();
+		for(Road r : roads)
+			r.updatePos();			
+	}
+	
 	public void initialize(){
 		roadMap = new HashMap<Integer, Road>();
 		buildingsMap = new HashMap<Integer, Building>();
