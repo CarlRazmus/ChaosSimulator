@@ -56,11 +56,7 @@ public class Camera extends JComponent {
 		}
 		g.setColor(Color.LIGHT_GRAY);
 		for (Road road : model.getRoads()){
-			if(road.isBlocked()){
-				g.setColor(Color.green);
-				g.fillRect(x + road.getXPos(), y + road.getYPos(), scale, scale);
-				g.setColor(Color.LIGHT_GRAY);
-			}else
+				g.setColor(road.getColor());
 				g.fillRect(x + road.getXPos(), y + road.getYPos(), scale, scale);
 		}
 		
@@ -77,7 +73,7 @@ public class Camera extends JComponent {
 						for(CityObject o : agent.getPathFinder().getDebugData())
 							g.fillRect(x + o.getXPos(), y + o.getYPos(), scale, scale);
 				}
-				g.setColor(Color.BLACK);
+				g.setColor(Color.green);
 				g.fillRect(x + agent.getTarget().getXPos(), y + agent.getTarget().getYPos(), scale, scale);
 			}
 			g.setColor(Color.RED);
@@ -125,13 +121,6 @@ public class Camera extends JComponent {
 	public void setAgents(ArrayList<Agent> agents) {
 		this.agents = agents;
 	}
-
-	
-	
-	
-	
-	
-	
 
 	
 	public void handleKeyEvent(KeyEvent e){

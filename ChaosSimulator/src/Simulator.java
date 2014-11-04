@@ -1,5 +1,7 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Label;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -81,9 +83,17 @@ public class Simulator extends JFrame implements KeyListener {
 		camera.setAgents(agents);
 		
 
-		frameWidth = 800;//reader.getCityWidth()*SCALE + 20;
-		frameHeight = 600;//reader.getCityHeight()*SCALE + 20;
+		frameWidth = reader.getCityWidth()*Camera.scale + 100;
+		frameHeight = reader.getCityHeight()*Camera.scale + 100;
 		
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		double width = screenSize.getWidth();
+		double height = screenSize.getHeight();
+		
+		if(frameWidth > width)
+			frameWidth = (int)width;
+		if(frameHeight > height)
+			frameHeight = (int)height;
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
         this.setVisible(true);
@@ -92,16 +102,16 @@ public class Simulator extends JFrame implements KeyListener {
 		
 		
 		// put up some blockades on the roads
-		model.getRoads().get(150).setBlocked(true);
-		model.getRoads().get(190).setBlocked(true);
-		model.getRoads().get(300).setBlocked(true);
-		model.getRoads().get(400).setBlocked(true);
-		model.getRoads().get(500).setBlocked(true);
+		model.getRoads().get(150).block();
+		model.getRoads().get(190).block();
+		model.getRoads().get(300).block();
+		model.getRoads().get(400).block();
+		model.getRoads().get(500).block();
 
-		model.getRoads().get(650).setBlocked(true);
-		model.getRoads().get(700).setBlocked(true);
-		model.getRoads().get(750).setBlocked(true);
-		model.getRoads().get(998).setBlocked(true);
+		model.getRoads().get(650).block();
+		model.getRoads().get(700).block();
+		model.getRoads().get(750).block();
+		model.getRoads().get(998).block();
 		
 
 		requestFocus();

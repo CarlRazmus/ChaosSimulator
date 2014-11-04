@@ -1,8 +1,10 @@
+import java.awt.Color;
+
 
 public class FireFighter extends Agent{
 
 	public FireFighter() {
-		super();
+		super(Color.red);
 	}
 	
 	public FireFighter(MovementBehavior movementBehavior){

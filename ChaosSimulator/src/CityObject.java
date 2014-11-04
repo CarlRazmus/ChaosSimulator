@@ -1,5 +1,8 @@
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import sun.awt.image.PixelConverter.Rgba;
 
 
 public class CityObject {
@@ -11,27 +14,42 @@ public class CityObject {
 	private FierynessLevel fierynessLevel;
 	private int id;
 	private boolean blocked = false;
+	private Color color;
+	private Color originalColor;
 	
 	private static final int FIERYNESS_CYCLE_COUNT_UP = 10;
 	
 	enum FierynessLevel{
+		none,
 		low,
 		medium,
 		high
 	};
 	
 	public CityObject(){
-		neighbours = new ArrayList<CityObject>();
-		this.id = CityDataReader.IDCount++;
+		initializeStuff();
 	}
 	
-	public CityObject(int x, int y){
+	public CityObject(Color color){
+		this.color = color;
+		this.originalColor = color;
+		initializeStuff();
+	}
+	
+	public CityObject(int x, int y, Color color){
 		this.x = x;
 		this.y = y;
+		this.color = color;
+		this.originalColor = color;
 		xPos = x*Camera.scale;
 		yPos = y*Camera.scale;
+		initializeStuff();
+	}
+	
+	private void initializeStuff(){
 		neighbours = new ArrayList<CityObject>();
 		this.id = CityDataReader.IDCount++;
+		fierynessLevel = FierynessLevel.values()[0];
 	}
 	
 	public int getXPos(){
@@ -74,29 +92,41 @@ public class CityObject {
 	}
 	
 	public void increaseFierynessLevel(){
-		if(fierynessLevel != null){
-			int index = Arrays.asList(FierynessLevel.values()).indexOf(fierynessLevel);
-			if(index < FierynessLevel.values().length - 1)
-				fierynessLevel = FierynessLevel.values()[index + 1];
-		}
-		else
-			fierynessLevel = FierynessLevel.values()[0];
+		int index = Arrays.asList(FierynessLevel.values()).indexOf(fierynessLevel);
+		if(index < FierynessLevel.values().length - 1)
+			fierynessLevel = FierynessLevel.values()[index + 1];
 	}
 
 	public int getId() {
 		return id;
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
 
 	public boolean isBlocked() {
 		return blocked;
 	}
 
-	public void setBlocked(boolean blocked) {
-		this.blocked = blocked;
+	public void block() {
+		this.blocked = true;
+		color = Color.darkGray;
 	}
+	
+	public void unBlock(){
+		blocked = false;
+		color = originalColor;
+	}
+
+	public Color getColor() {
+		return color;
+	}
+	
+	public void exposeToFire(double fireynessLevel){
+		
+	}
+	
+//
+//	public void setColor(Color color) {
+//		this.color = color;
+//	}
 	
 }

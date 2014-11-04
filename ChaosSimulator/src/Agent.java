@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.util.ArrayList;
 
 public abstract class Agent extends CityObject {
@@ -14,9 +15,8 @@ public abstract class Agent extends CityObject {
 	public abstract void think();
 
 	
-	
-	// Constructors
-	public Agent() {
+	public Agent(Color color){
+		
 	}
 
 	public Agent(MovementBehavior movementBehavior) {
