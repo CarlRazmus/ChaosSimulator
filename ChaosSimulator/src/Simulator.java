@@ -94,6 +94,7 @@ public class Simulator extends JFrame implements KeyListener {
 			frameWidth = (int)width;
 		if(frameHeight > height)
 			frameHeight = (int)height;
+		
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
         this.setVisible(true);

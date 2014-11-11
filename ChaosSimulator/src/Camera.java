@@ -41,8 +41,14 @@ public class Camera extends JComponent {
 		x -= scale;
 		System.out.println("moving Left");
 	}
-	
-	
+	public void moveUp(){
+		y -= scale;
+		System.out.println("moving Up");
+	}
+	public void moveDown(){
+		y += scale;
+		System.out.println("moving Down");
+	}
 	public Camera(ArrayList<Agent> agents){
 		this.agents = agents;
 	}
@@ -77,7 +83,8 @@ public class Camera extends JComponent {
 				g.fillRect(x + agent.getTarget().getXPos(), y + agent.getTarget().getYPos(), scale, scale);
 			}
 			g.setColor(Color.RED);
-			g.fillRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), scale, scale);
+			g.fillRoundRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), scale, scale, 20, 20);
+//			g.fillRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), scale, scale);
 		}
 		debug(g);
 		g.setColor(oldColor);
@@ -96,7 +103,7 @@ public class Camera extends JComponent {
 			g.drawString(Integer.toString(cross.getId()), x + cross.getXPos() + 5, y + cross.getYPos());
 	}
 
-	/* show all crossings neighbour crossings */
+	/* show all crossings neighbour crossings 
 //	private void debugCrossingsNeighbours(Graphics g){
 //		if(count == model.getCrossings().size())
 //			count = 0;
@@ -112,7 +119,7 @@ public class Camera extends JComponent {
 //			time = System.currentTimeMillis();
 //		}
 //	}
-	
+	*/
 
 	public void setModel(WorldModel model) {
 		this.model = model;
@@ -125,31 +132,29 @@ public class Camera extends JComponent {
 	
 	public void handleKeyEvent(KeyEvent e){
 		int key = e.getKeyCode();
-	
-	    if (key == KeyEvent.VK_LEFT) {
-	        moveLeft();
-	    }
-	
-	    if (key == KeyEvent.VK_RIGHT) {
-	    	moveRight();
-	    }
-	
-	    if (key == KeyEvent.VK_UP) {
 
-	    }
-	
-	    if (key == KeyEvent.VK_DOWN) {
-
-	    }
-		
-	    if (key == KeyEvent.VK_Z) {
+		switch (key) {
+		case KeyEvent.VK_LEFT:
+			moveRight();
+			break;
+		case KeyEvent.VK_RIGHT:
+			moveLeft();
+			break;
+		case KeyEvent.VK_UP:
+	    	moveDown();
+	    	break;
+		case KeyEvent.VK_DOWN:
+		    moveUp();
+			break;
+		case KeyEvent.VK_Z:
 	    	zoomIn();
-	    }
-	    
-	    if (key == KeyEvent.VK_X) {
+		    break;
+		case KeyEvent.VK_X:
 	    	zoomOut();
-	    }	
-
+			break;
+		default:
+			break;
+		}
 	}
 	
 }
