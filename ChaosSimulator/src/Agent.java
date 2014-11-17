@@ -44,11 +44,17 @@ public abstract class Agent extends CityObject {
 		}
 		else{
 			this.location = path.get(positionIndex);
+			moveTo(path.get(positionIndex));
 			positionIndex++;
 			nrTraversedNodes++;
 		}
 	}
 	
+	//TODO add all errorcorrection to Agent instead of having it in FireFighter
+	public void reportBadPath(){
+		setTarget(null);
+		setPath(null);
+	}
 	public boolean atEndOfPath(){
 //		System.out.println("atEndOfPath "+ positionIndex +"/"+path.size());
 		if(positionIndex == path.size())

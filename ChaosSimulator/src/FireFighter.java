@@ -34,14 +34,15 @@ public class FireFighter extends Agent{
 		/* if no valid path has been found */
 		else if(getPath() == null){
 //			System.out.println("path was null, sets target to null");
-			setTarget(null);
+			reportBadPath();
+//			setTarget(null);
 		}
 		else if( getPath().isEmpty()){
 //			System.out.println("path was empty, sets target to null");
 			setTarget(null);
+			reportBadPath();
 		}
 		else{
-			
 			if(getLocation().getId() == getTarget().getId()){
 				setTarget(null);
 			}

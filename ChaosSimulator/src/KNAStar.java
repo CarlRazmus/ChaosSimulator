@@ -19,11 +19,20 @@ public class KNAStar extends PathFinder{
 	public void calculatePath(CityObject location, CityObject target) {
 		/* iterate K times 
 		 * 		build up a  list of available paths with the length of the paths and also a value for the bird-distance to the goal
-		 * 		return N steps the path with best G-score	
+		 * 		return N steps of the path with best G-score	
 		 */
 	}
 
 
+	private void analyzeMapStructure(){
+		
+	}
+	
+	//TODO add functionality to generateKNValues or remove analyzeMapStructure 
+	public void generateKNValues(Object map){
+		analyzeMapStructure();
+	}
+	
 	@Override
 	public ArrayList<CityObject> getPath() {
 		return path;
