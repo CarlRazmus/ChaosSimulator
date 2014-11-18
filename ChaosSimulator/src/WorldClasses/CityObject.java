@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import Default.Camera;
 import Default.CityDataReader;
-import sun.awt.image.PixelConverter.Rgba;
 
 
 public class CityObject {
@@ -20,7 +19,7 @@ public class CityObject {
 	private Color color;
 	private Color originalColor;
 	
-	private static final int FIERYNESS_CYCLE_COUNT_UP = 10;
+	//private static final int FIERYNESS_CYCLE_COUNT_UP = 10;
 	
 	enum FierynessLevel{
 		none,

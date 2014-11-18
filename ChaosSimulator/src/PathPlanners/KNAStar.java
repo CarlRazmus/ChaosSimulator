@@ -11,7 +11,7 @@ public class KNAStar extends PathFinder{
 	//choose a parameter N which defines how many crossings the path will return
 	private int k;
 	private int n;
-	ArrayList<CityObject> path = new ArrayList<CityObject>();
+	private ArrayList<CityObject> path = new ArrayList<CityObject>();
 	
 	public KNAStar(int k, int n){
 		this.k = k;

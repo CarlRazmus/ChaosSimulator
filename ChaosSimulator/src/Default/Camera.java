@@ -1,17 +1,15 @@
 package Default;
 import java.awt.Color;
-import java.awt.Event;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
+import AI.Agent;
 import WorldClasses.Building;
 import WorldClasses.CityObject;
 import WorldClasses.Road;
-import AI.Agent;
 
 public class Camera extends JComponent {
 	private static final long serialVersionUID = 1L;

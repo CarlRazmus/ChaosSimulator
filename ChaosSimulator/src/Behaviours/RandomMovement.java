@@ -1,7 +1,6 @@
 package Behaviours;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import Default.Simulator;
 import WorldClasses.CityObject;

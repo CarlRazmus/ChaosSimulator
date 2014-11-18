@@ -22,9 +22,13 @@ public class InformationWindow extends JFrame{
 	private int frameHeight = 800;
 	private ChartPanel chartPanel;
 	
-	private JFreeChart chart;
+//	private JFreeChart chart;
 	private XYSeries totalMemoryUsedSeries;
 	private XYSeriesCollection dataset;
+	
+
+	private long time; 
+	private int xCounter = 1;
 	
 	public InformationWindow(String windowName, int xVal, int yVal){
 		super(windowName);
@@ -40,12 +44,9 @@ public class InformationWindow extends JFrame{
         chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
         setContentPane(chartPanel);
         this.pack();
-
-		long time = System.currentTimeMillis();
+        time = System.currentTimeMillis();
 	}
 	
-	private long time; 
-	private int counter = 1;
 	
 	public void updateGraph(){
 		if(System.currentTimeMillis() < time + 1000){
@@ -58,25 +59,25 @@ public class InformationWindow extends JFrame{
 		// get Runtime instance
 		Runtime instance = Runtime.getRuntime();
  
-		System.out.println("***** Heap utilization statistics [MB] *****\n");
- 
-		// available memory
-		System.out.println("Total Memory: " + instance.totalMemory() / mb);
- 
-		// free memory
-		System.out.println("Free Memory: " + instance.freeMemory() / mb);
- 
-		// used memory
-		System.out.println("Used Memory: "
-				+ (instance.totalMemory() - instance.freeMemory()) / mb);
- 
-		// Maximum available memory
-		System.out.println("Max Memory: " + instance.maxMemory() / mb);
+//		System.out.println("***** Heap utilization statistics [MB] *****\n");
+// 
+//		// available memory
+//		System.out.println("Total Memory: " + instance.totalMemory() / mb);
+// 
+//		// free memory
+//		System.out.println("Free Memory: " + instance.freeMemory() / mb);
+// 
+//		// used memory
+//		System.out.println("Used Memory: "
+//				+ (instance.totalMemory() - instance.freeMemory()) / mb);
+// 
+//		// Maximum available memory
+//		System.out.println("Max Memory: " + instance.maxMemory() / mb);
 		
 		
-		totalMemoryUsedSeries.add(counter, (instance.totalMemory() - instance.freeMemory()) / mb);
+		totalMemoryUsedSeries.add(xCounter, (instance.totalMemory() - instance.freeMemory()) / mb);
         chartPanel.updateUI();
-        counter++;
+        xCounter++;
 	}
 	
 	private void createDataset() {

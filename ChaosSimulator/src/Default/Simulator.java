@@ -1,14 +1,11 @@
 package Default;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Label;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import AI.Agent;
 import AI.FireFighter;
@@ -20,6 +17,9 @@ import debug.InformationWindow;
 
 
 public class Simulator extends JFrame implements KeyListener {
+	
+	private static final long serialVersionUID = 1L;
+	
 	private CityDataReader reader;
 	public static WorldModel model;
 	private Camera camera;
@@ -159,6 +159,5 @@ public class Simulator extends JFrame implements KeyListener {
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("HAHAHAHAHAHAHAHAH");
 	}
 }
