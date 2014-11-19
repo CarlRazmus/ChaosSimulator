@@ -21,8 +21,8 @@ public class InformationWindow extends JFrame{
 	private int frameWidth = 200;
 	private int frameHeight = 800;
 	private ChartPanel chartPanel;
+	private final int MB = 1024 * 1024; 
 	
-//	private JFreeChart chart;
 	private XYSeries totalMemoryUsedSeries;
 	private XYSeriesCollection dataset;
 	
@@ -43,7 +43,9 @@ public class InformationWindow extends JFrame{
         chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
         setContentPane(chartPanel);
+        
         this.pack();
+        
         time = System.currentTimeMillis();
 	}
 	
@@ -54,37 +56,19 @@ public class InformationWindow extends JFrame{
 		}
 		time = System.currentTimeMillis();
 		
-		int mb = 1024 * 1024; 
 		 
 		// get Runtime instance
-		Runtime instance = Runtime.getRuntime();
- 
-//		System.out.println("***** Heap utilization statistics [MB] *****\n");
-// 
-//		// available memory
-//		System.out.println("Total Memory: " + instance.totalMemory() / mb);
-// 
-//		// free memory
-//		System.out.println("Free Memory: " + instance.freeMemory() / mb);
-// 
-//		// used memory
-//		System.out.println("Used Memory: "
-//				+ (instance.totalMemory() - instance.freeMemory()) / mb);
-// 
-//		// Maximum available memory
-//		System.out.println("Max Memory: " + instance.maxMemory() / mb);
+		Runtime instance = Runtime.getRuntime();		
 		
-		
-		totalMemoryUsedSeries.add(xCounter, (instance.totalMemory() - instance.freeMemory()) / mb);
+		totalMemoryUsedSeries.add(xCounter, (instance.totalMemory() - instance.freeMemory()) / MB);
         chartPanel.updateUI();
         xCounter++;
 	}
 	
 	private void createDataset() {
-        totalMemoryUsedSeries = new XYSeries("MySeries");
-        
+        totalMemoryUsedSeries = new XYSeries("Total Used Memory [MB]");
         dataset = new XYSeriesCollection();
-        dataset.addSeries(totalMemoryUsedSeries);   
+        dataset.addSeries(totalMemoryUsedSeries);
     }
 	
 	private JFreeChart createChart(final XYDataset dataset) {
