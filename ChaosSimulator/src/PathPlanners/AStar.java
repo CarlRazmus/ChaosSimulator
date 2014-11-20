@@ -9,8 +9,8 @@ import WorldClasses.LongRoad;
 
 public class AStar extends PathFinder{
 
-	ArrayList<CityObject> path = new ArrayList<CityObject>();
-	CityObject goal = null;
+	private ArrayList<CityObject> path = new ArrayList<CityObject>();
+	private CityObject goal = null;
 	
 	public int nrExploredNodes = 0;
 	
