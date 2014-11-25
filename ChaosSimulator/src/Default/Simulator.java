@@ -12,6 +12,7 @@ import AI.FireFighter;
 import Behaviours.RandomMovement;
 import PathPlanners.RTAStar;
 import WorldClasses.CityObject;
+import WorldClasses.CrossingsMap;
 import debug.InformationWindow;
 
 

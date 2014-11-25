@@ -1,10 +1,6 @@
-package Default;
+package WorldClasses;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import WorldClasses.CityObject;
-import WorldClasses.LongRoad;
-import WorldClasses.Road;
 
 
 public class CrossingsMap {

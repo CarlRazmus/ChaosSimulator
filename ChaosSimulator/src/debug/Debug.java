@@ -1,4 +1,4 @@
-package Default;
+package debug;
 
 public class Debug {
 	

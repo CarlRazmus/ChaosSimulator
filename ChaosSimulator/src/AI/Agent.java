@@ -2,10 +2,10 @@ package AI;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import PathPlanners.PathFinder;
 import WorldClasses.CityObject;
 import WorldClasses.Road;
 import Behaviours.MovementBehavior;
-import Default.PathFinder;
 
 public abstract class Agent extends CityObject {
 	private MovementBehavior movementBehavior;
