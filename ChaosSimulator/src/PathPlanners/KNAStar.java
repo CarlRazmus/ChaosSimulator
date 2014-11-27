@@ -77,17 +77,17 @@ public class KNAStar extends PathFinder{
 		
 		while(!openSet.isEmpty() || iterationCounter < k){
 			double lowestScore = Double.MAX_VALUE;
+
 			for(CityObject node : openSet){
-				
-				nrExploredNodes++;
-				
 				if(f_score.get(node) < lowestScore){
 					lowestScore = f_score.get(node);
 					current = node;
 				}
+				nrExploredNodes++;
 			}
 	
-			/* reconstruct path */ 
+			//TODO MAKE A FUNCTION FOR THIS
+			/* reconstruct path if goal has been found*/ 
 			if(current.getId() == goal.getId()){
 	//			System.out.println("Found a optimal path to the goal-node");
 				CityObject from = came_from.get(current);
@@ -118,7 +118,6 @@ public class KNAStar extends PathFinder{
 				}
 					
 				if(!openSet.contains(neighbourCrossing) || tentative_f_score < f_score.get(neighbourCrossing)){
-	//				System.out.println("didnt abort");
 					came_from.put(neighbourCrossing, current);
 	                g_score.put(neighbourCrossing, tentative_g_score);
 	                f_score.put(neighbourCrossing, tentative_f_score);

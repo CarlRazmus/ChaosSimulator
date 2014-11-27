@@ -107,6 +107,7 @@ public class AStar extends PathFinder{
 		return Math.sqrt(yDiff*yDiff + xDiff*xDiff);
 	}
 
+	//TODO implement in PathFinder instead
 	@Override
 	public ArrayList<CityObject> getPath() {
 //		System.out.println("returned a path from A* with size" + path.size());
