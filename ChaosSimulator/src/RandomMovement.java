@@ -25,7 +25,8 @@ public class RandomMovement extends MovementBehavior {
 //		ArrayList<CityObject> roads = Simulator.model.getCrossings();
 //		int max = roads.size();
 //		Random rand = new Random();
-		
+		if( count == list.size()) 
+			return null;
 		return list.get(++count);
 //		return roads.get(rand.nextInt(max - 1));
 	}

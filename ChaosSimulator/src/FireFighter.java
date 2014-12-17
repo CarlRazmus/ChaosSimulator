@@ -21,7 +21,7 @@ public class FireFighter extends Agent{
 		if(getTarget() == null)
 		{
 			setTarget(getMovementBehavior().calculateTarget(getLocation()));
-			
+		
 			getPathFinder().initialize(getLocation(), getTarget());
 			
 			getPathFinder().calculatePath(getLocation(), getTarget());
