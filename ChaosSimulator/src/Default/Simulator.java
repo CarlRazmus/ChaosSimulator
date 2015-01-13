@@ -4,12 +4,16 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
 import AI.Agent;
 import AI.FireFighter;
+import AI.PoliceCar;
 import Behaviours.RandomMovement;
+import PathPlanners.AStar;
+import PathPlanners.KNAStar;
 import PathPlanners.RTAStar;
 import WorldClasses.CityObject;
 import WorldClasses.CrossingsMap;
@@ -27,6 +31,10 @@ public class Simulator extends JFrame implements KeyListener {
 	private int frameHeight;
 	private int frameWidth;
 	private ArrayList<Agent> agents;
+
+	private ArrayList<CityObject> goals;
+	private final int NR_POLICE_CARS = 1;
+	private final int NR_FIRE_BRIGADES = 1;
 //	public static final int DEFAULT_SIZE = 5;
 //	private final double FIRE_CHANCE_FACTOR = 0.5;
 	
@@ -35,18 +43,67 @@ public class Simulator extends JFrame implements KeyListener {
 		simulator.initialize();
 	}	
 	
-	private void addAgents(CityDataReader reader){		
-		for(int i = 0; i < 1; i ++)
-			addFireBrigade();
+	private void addAgents(){		
+		for(int i = 0; i < NR_FIRE_BRIGADES; i ++)
+			addFireBrigade();		
+		for(int i = 0; i < NR_POLICE_CARS; i ++)
+			addPoliceCar();
+	}
+	
+	
+	private void generateRandomGoals(){
+		goals = new ArrayList<CityObject>();
+		
+		Random random = new Random();
+		for(int i = 0; i < 100; i++){
+			int value = random.nextInt(Simulator.model.getRoads().size());
+			goals.add(Simulator.model.getRoads().get(value));
+			if(Simulator.model.getRoads().get(value).getNeighbours().size() == 1){
+				goals.remove(Simulator.model.getRoads().get(value));
+				System.out.println("didnt add goal: goal only had 1 neighbour");
+				continue;
+			}
+			for(CityObject o : Simulator.model.getRoads().get(value).getNeighbours()){
+				//dont add the goal if is neigbor with a crossing
+				if(Simulator.model.getCrossings().contains(o)){
+					goals.remove(Simulator.model.getRoads().get(value));
+					System.out.println("didnt add goal: goal was neighbor to a crossing");
+					break;
+				}
+				//dont add the goal if it is neighbor to another existing goal
+				else if(goals.contains(o)){
+					goals.remove(Simulator.model.getRoads().get(value));
+					System.out.println("didnt add goal: was neighbor to a already existing goal");
+					break;
+				}
+			}//1674
+		}
+	}
+	
+	private void addPoliceCar(){
+		PoliceCar pc = new PoliceCar();
+		RandomMovement policeCarRandomMovement = new RandomMovement();
+		policeCarRandomMovement.setList(goals);
+		pc.setMovementBehavior(policeCarRandomMovement);
+		pc.setPathFinder(new KNAStar(70,50));
+		pc.getPathFinder().setMap(generateCrossingsMap());
+		pc.setLocation(model.getRoads().get(0));
+
+		pc.getPathFinder().getMap().checkCrossingCorruption();
+
+		agents.add(pc);
 	}
 	
 	private void addFireBrigade(){
 		FireFighter fb = new FireFighter();
-		fb.setMovementBehavior(new RandomMovement());
-		fb.setPathFinder(new RTAStar());
-		
+		RandomMovement fireBrigadeRandomMovement = new RandomMovement();
+		fireBrigadeRandomMovement.setList(goals);
+		fb.setMovementBehavior(fireBrigadeRandomMovement);
+		fb.setPathFinder(new KNAStar(70,50));
 		fb.getPathFinder().setMap(generateCrossingsMap());
 		fb.setLocation(model.getRoads().get(0));
+
+		fb.getPathFinder().getMap().checkCrossingCorruption();
 		
 		agents.add(fb);
 	}
@@ -86,7 +143,8 @@ public class Simulator extends JFrame implements KeyListener {
 		model.setRoads(reader.getRoads());
 		model.addCrossings(reader.getCrossings());
 		
-		addAgents(reader);
+		generateRandomGoals();
+		addAgents();
 		
 		camera.setModel(model);
 		camera.setAgents(agents);
@@ -114,23 +172,23 @@ public class Simulator extends JFrame implements KeyListener {
 		
 		
 		// put up some blockades on the roads
-		model.getRoads().get(150).block();
-		model.getRoads().get(190).block();
-		model.getRoads().get(300).block();
-		model.getRoads().get(400).block();
-		model.getRoads().get(500).block();
+//		model.getRoads().get(150).block();
+//		model.getRoads().get(190).block();
+//		model.getRoads().get(300).block();
+//		model.getRoads().get(400).block();
+//		model.getRoads().get(500).block();
 
-		model.getRoads().get(650).block();
-		model.getRoads().get(700).block();
-		model.getRoads().get(750).block();
-		model.getRoads().get(998).block();
+//		model.getRoads().get(650).block();
+//		model.getRoads().get(700).block();
+//		model.getRoads().get(750).block();
+//		model.getRoads().get(998).block();
 		
 
 		requestFocus();
 		
 		long time = System.currentTimeMillis();
 		while(true){
-			if(System.currentTimeMillis() > time + 150){
+			if(System.currentTimeMillis() > time + 4){
 				simulate();
 				informationWindow.updateGraph();
 				time = System.currentTimeMillis();
@@ -138,11 +196,22 @@ public class Simulator extends JFrame implements KeyListener {
 			}
 		}
 	}
-	
-	public void simulate()
-	{
+
+	ArrayList<Agent> removeList = new ArrayList<Agent>();
+	public void simulate(){
 		for (Agent agent : agents){
-			agent.think();
+				agent.think();
+				if(!agent.isOnline()){
+					removeList.add(agent);
+					System.out.println("agent is offline and is removed");
+				}
+		}
+		
+		if(!removeList.isEmpty()){
+			for (Agent agent : removeList){
+				agents.remove(agent);
+			}
+			removeList.clear();
 		}
 	}
 

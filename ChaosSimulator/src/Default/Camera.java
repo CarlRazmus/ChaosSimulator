@@ -17,7 +17,7 @@ public class Camera extends JComponent {
 	private WorldModel model;
 	private ArrayList<Agent> agents;
 	
-	public static int scale = 7;
+	public static int scale = 3;
 	private int x = 0;
 	private int y = 0;
 	long time;
@@ -39,25 +39,22 @@ public class Camera extends JComponent {
 	
 	public void moveRight(){
 		x += scale;
-		System.out.println("moving right");
 	}
 	public void moveLeft(){
 		x -= scale;
-		System.out.println("moving Left");
 	}
 	public void moveUp(){
 		y -= scale;
-		System.out.println("moving Up");
 	}
 	public void moveDown(){
 		y += scale;
-		System.out.println("moving Down");
 	}
 	public Camera(ArrayList<Agent> agents){
 		this.agents = agents;
 	}
 	
 	public void paint(Graphics g){
+		//*
 		Color oldColor = g.getColor();
 		g.setColor(Color.DARK_GRAY);
 		for (Building o : model.getBuildings()){
@@ -71,27 +68,29 @@ public class Camera extends JComponent {
 		}
 		
 		for(Agent agent : agents){
-			
-			if(agent.getTarget() != null){
-				if(agent.getPath() != null){
-					g.setColor(Color.orange);
-					for(CityObject o : agent.getPath())
-						g.fillRect(x + o.getXPos(), y + o.getYPos(), scale, scale);
-					
+			/*if(agent.getPath() != null){
+//				g.setColor(Color.orange);
+				g.setColor(new Color(10, 150, 150, 40));
+				for(CityObject o : agent.getPath())
+					g.fillRect(x + o.getXPos(), y + o.getYPos(), scale, scale);
+				
+				if(agent.getPathFinder().getDebugData() != null){
 					g.setColor(Color.MAGENTA);
-					if(agent.getPathFinder().getDebugData() != null)
-						for(CityObject o : agent.getPathFinder().getDebugData())
-							g.fillRect(x + o.getXPos(), y + o.getYPos(), scale, scale);
+					for(CityObject o : agent.getPathFinder().getDebugData())
+						g.fillRect(x + o.getXPos(), y + o.getYPos(), scale, scale);
 				}
+			}*/
+			if(agent.getTarget() != null){	
 				g.setColor(Color.green);
 				g.fillRect(x + agent.getTarget().getXPos(), y + agent.getTarget().getYPos(), scale, scale);
 			}
-			g.setColor(Color.RED);
-			g.fillRoundRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), scale, scale, 20, 20);
-//			g.fillRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), scale, scale);
+			g.setColor(agent.getColor());
+			g.fillRoundRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), scale + 10, scale + 10, 20, 20);
+//			g.fillRect(x + agent.getXPos(), y + agent.getYPos(), scale, scale);
 		}
 		debug(g);
 		g.setColor(oldColor);
+		//*/
 	}
 	
 	private void debug(Graphics g){

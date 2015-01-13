@@ -8,31 +8,31 @@ import WorldClasses.Road;
 import Behaviours.MovementBehavior;
 
 public abstract class Agent extends CityObject {
-	private MovementBehavior movementBehavior;
-	private PathFinder pathFinder;
-	private CityObject target;
-	private CityObject location;
-	private ArrayList<CityObject> path;
+	protected MovementBehavior movementBehavior;
+	protected PathFinder pathFinder;
+	protected CityObject target;
+	protected CityObject location;
+	protected ArrayList<CityObject> path;
 	private int positionIndex = 1;
 	
-	private int nrTraversedNodes = 0;
-
+	protected int nrTraversedNodes = 0;
+	private Color color;
+	protected boolean isOnline = true;
+	
 	// abstract methods
 	public abstract void think();
 
 	
 	public Agent(Color color){
-		
+		this.color = color;
 	}
+	
 
-	public Agent(MovementBehavior movementBehavior) {
-		this.movementBehavior = movementBehavior;
-	}
 
-	public Agent(MovementBehavior movementBehavior, CityObject location) {
-		this.movementBehavior = movementBehavior;
-		this.location = location;
-	}
+//	public Agent(MovementBehavior movementBehavior, CityObject location) {
+//		this.movementBehavior = movementBehavior;
+//		this.location = location;
+//	}
 
 	public void moveTo(CityObject nextLocation) {
 		this.location = nextLocation;
@@ -113,5 +113,11 @@ public abstract class Agent extends CityObject {
 
 	public int getNrTraversedNodes() {
 		return nrTraversedNodes;
+	}
+
+
+	public boolean isOnline() {
+		// TODO Auto-generated method stub
+		return isOnline;
 	}
 }

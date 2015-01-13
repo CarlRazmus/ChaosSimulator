@@ -12,6 +12,14 @@ public class CrossingsMap {
 	private ArrayList<CityObject> resetCrossingsList = new ArrayList<>();
 	private ArrayList<CityObject> blockedRoads = new ArrayList<>();
 	
+	
+	
+	
+	public ArrayList<CityObject> getResetCrossingsList() {
+		return resetCrossingsList;
+	}
+
+
 	private void addCrossing(CityObject road){
 		neighbourCrossings.put(road, new ArrayList<LongRoad>());
 		crossings.add(road);
@@ -19,8 +27,8 @@ public class CrossingsMap {
 	
 	
 	public void updateWithBlockedRoad(CityObject blockedRoad){
-
 		System.out.println("updates the neighbourCrossings with a blocked road");
+		
 		/* check if the road is a crossing */
 		if(crossings.contains(blockedRoad))
 			System.out.println("the road that was blocked was a crossing");
@@ -40,20 +48,25 @@ public class CrossingsMap {
 	}
 	
 	public void updateCrossings(CityObject newRoad){
-		System.out.println("updates the crossingsMap with a new crossing");
+//		System.out.println("updates the crossingsMap with a new crossing");
+		if(crossings.contains(newRoad))
+			return;
+		
 		addCrossing(newRoad);
 		
 		ArrayList<CityObject> visited = new ArrayList<>();
 		
 		//1. find the two crossings(can be a single crossing too) that the new node intercepts
 		visited.add(newRoad);
-		resetCrossingsList.add(newRoad);
+		resetCrossingsList.add(newRoad); //getResetCrossingsList().add(newRoad);
 		findCrossingNeighbours(newRoad);
 		for(CityObject neighbour : newRoad.getNeighbours()){
 			if(neighbour instanceof Road){
-				CityObject crossing1 = checkForRoad(neighbour, visited);
-				neighbourCrossings.put(crossing1, new ArrayList<LongRoad>());
-				findCrossingNeighbours(crossing1);
+				CityObject crossing = checkForRoad(neighbour, visited);
+				if(crossing == null)
+					continue;
+				neighbourCrossings.put(crossing, new ArrayList<LongRoad>());
+				findCrossingNeighbours(crossing);
 			}
 		}
 	}
@@ -148,8 +161,10 @@ public class CrossingsMap {
 	public boolean checkCrossingCorruption(){
 		for(CityObject o : crossings){
 			for(LongRoad lr : neighbourCrossings.get(o)){
-				if(lr.getPath().size() == 0)
+				if(lr.getPath().size() == 0){
+					System.out.print("crossing " + o.getId() + " ");
 					return true;
+				}
 			}
 		}
 		return false;
@@ -204,10 +219,10 @@ public class CrossingsMap {
 	}
 	
 	public void removeTempNodes(){
-		for(CityObject crossing : resetCrossingsList){
+		for(CityObject crossing : getResetCrossingsList()){
 			removeNode(crossing);	
 		}
-		resetCrossingsList.clear();
+		getResetCrossingsList().clear();
 	}		
 	
 	/* remove the node and calculates values for the neigbours of that node again  */

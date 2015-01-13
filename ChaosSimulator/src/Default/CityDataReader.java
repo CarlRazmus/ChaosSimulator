@@ -15,7 +15,7 @@ import WorldClasses.Road;
 public class CityDataReader {
 
 	final String CITYCOLORFILE = "src/CityColor.png";
-	final String CITYFILE = "src/City.png";
+	final String CITYFILE = "src/City1000x1000.png";
 	private ArrayList<Road> roads;
 	private ArrayList<BuildingBlock> buildingBlocks;
 	private ArrayList<Building> buildings;

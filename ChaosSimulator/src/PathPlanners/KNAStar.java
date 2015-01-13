@@ -8,12 +8,12 @@ import WorldClasses.LongRoad;
 
 
 public class KNAStar extends PathFinder{
-	//choose a parameter K which defines how many crossings the algorithm will include
-	//choose a parameter N which defines how many crossings the path will return
+	//choose a parameter K which defines how many crossings the algorithm will calculate over
+	//choose a parameter N which defines the max amount of crossings the returned path will include (if the goal hasn't been found)
 	private int k;
 	private int n;
 	private ArrayList<CityObject> path = new ArrayList<CityObject>();
-	private CityObject goal;
+//	private CityObject goal;
 	
 	ArrayList<CityObject> closedSet = new ArrayList<>();
 	ArrayList<CityObject> openSet = new ArrayList<>();
@@ -21,8 +21,8 @@ public class KNAStar extends PathFinder{
 	HashMap<CityObject, Integer> g_score = new HashMap<CityObject, Integer>(); 
 	HashMap<CityObject, Double> f_score = new HashMap<CityObject, Double>(); 
 	
-	public int nrExploredNodes = 0;
 	private int iterationCounter = 0;
+	private int totalNrExploredNodes = 0;
 	
 	
 	public KNAStar(int k, int n){
@@ -30,13 +30,30 @@ public class KNAStar extends PathFinder{
 		this.n = n;
 	}
 
-	private void initialize(){
+	@Override
+	public void resetLocalVariables(){
+		iterationCounter = 0;
 		closedSet.clear();
 		openSet.clear();
 		came_from.clear();
 		g_score.clear();
 		f_score.clear();
 		path.clear();
+		getMap().removeTempNodes();
+		totalNrExploredNodes = 0;
+		nrExploredNodes = 0;
+	}
+	
+	public void softReset(){
+		iterationCounter = 0;
+		nrExploredNodes = 0;
+		
+		path.clear();
+		closedSet.clear();
+		openSet.clear();
+		came_from.clear();
+		g_score.clear();
+		f_score.clear();
 	}
 	
 	/**
@@ -46,17 +63,29 @@ public class KNAStar extends PathFinder{
 		
 	}
 	
-	//TODO add functionality to generateKNValues or remove analyzeMapStructure 
+	//TODO change this later when implementing analyzeMapStructure
 	public void generateKNValues(Object map){
 		analyzeMapStructure();
 	}
 
+	private void printOpenSet(){
+		System.out.println("OPENSET");
+		for(CityObject o : openSet)
+			System.out.println(" " + o.getId());
+	}
+	private void printFScore(){
+		System.out.println("F-SCORE");
+		for(CityObject o : f_score.keySet())
+			System.out.println(" " + o.getId());
+	}
+
+	
 	@Override
 	public void calculatePath(CityObject start, CityObject goal) {
-		CityObject current = null;
 		this.goal = goal;
-		
-		initialize();
+		CityObject current = null;
+
+		softReset();
 		
 		/* the start and goal might be something other than a crossing, update the crossingsMap accordingly */
 		if(!getMap().getNodes().contains(start))
@@ -64,26 +93,29 @@ public class KNAStar extends PathFinder{
 		if(!getMap().getNodes().contains(goal))
 			getMap().updateCrossings(goal);
 		
-		
-		/* -- here begins the real code of the A* algorithm -- */
 		openSet.add(start);
 		g_score.put(start, 0);
 		f_score.put(start, g_score.get(start) + heuristic_cost(start,goal));
 		
-		while(!openSet.isEmpty() || iterationCounter < k){
+		while(!openSet.isEmpty() && iterationCounter++ < k){
+//			System.out.println("iteration #" + iterationCounter);
+//			printOpenSet();
+//			printFScore();
+//			System.out.println();
 			double lowestScore = Double.MAX_VALUE;
-
+			
 			for(CityObject node : openSet){
 				if(f_score.get(node) < lowestScore){
 					lowestScore = f_score.get(node);
 					current = node;
 				}
-				nrExploredNodes++;
 			}
 
 			/* reconstruct path if goal has been found*/ 
 			if(current.getId() == goal.getId()){
-				reconstruct_path(came_from, current);
+				backTrack(current, true);
+//				System.out.println("found the goal! returns the whole path to it");
+				System.out.println("KNAStar " + totalNrExploredNodes + " in openset for " + goal.getId());
 				return;
 			}
 			
@@ -95,10 +127,8 @@ public class KNAStar extends PathFinder{
 				int tentative_g_score = g_score.get(current) + getMap().distanceBtwnCrossings(current.getId(), neighbourCrossing.getId());
 				double tentative_f_score = tentative_g_score + heuristic_cost(neighbourCrossing, goal);
 	
-				if((closedSet.contains(neighbourCrossing) && tentative_f_score >= f_score.get(neighbourCrossing))){
-	//				System.out.println("aborted with continue");
+				if((closedSet.contains(neighbourCrossing) && tentative_f_score >= f_score.get(neighbourCrossing)))
 					continue;
-				}
 					
 				if(!openSet.contains(neighbourCrossing) || tentative_f_score < f_score.get(neighbourCrossing)){
 					came_from.put(neighbourCrossing, current);
@@ -106,11 +136,15 @@ public class KNAStar extends PathFinder{
 	                f_score.put(neighbourCrossing, tentative_f_score);
 	                if(!openSet.contains(neighbourCrossing)){
 	                		openSet.add(neighbourCrossing);
-	//                		System.out.println("added a node to the openset");
+	                		nrExploredNodes++;
+	                		totalNrExploredNodes++;
 	                }
 				}
 			}
 		}
+
+		backTrack(current, false);
+		System.out.println("KNAStar (" + nrExploredNodes + ")");
 	}
 	
 	private void reconstruct_path(HashMap<CityObject,CityObject> came_from, CityObject current){
@@ -126,8 +160,38 @@ public class KNAStar extends PathFinder{
 		}
 	}
 	
+	public void backTrack(CityObject current, boolean goalFound){
+		CityObject from = came_from.get(current);
+		ArrayList<LongRoad> longRoads = new ArrayList<LongRoad>();
+		
+		while(from != null){
+			//gets the path to current from its predeccessor, exluding the predeccessor.
+			longRoads.add(getMap().getLongRoad(from.getId(), current.getId()));
+			current = from;
+			from = came_from.get(current);
+		}
+
+		int size = longRoads.size();
+
+		for(int i = 1; i <= size; i++){
+			ArrayList<CityObject> subPath = longRoads.get(size - i).getPath();
+			subPath.remove(0);
+			path.addAll(subPath);
+			if(i >= n && !goalFound){
+//				System.out.println("returns a shorter path");
+				return;
+			}
+		}
+//		System.out.println("returns the complete path");
+	}
+	
+	/**
+	 * gets the bird-distance from start to goal
+	 * @param start
+	 * @param goal
+	 * @return
+	 */
 	private double heuristic_cost(CityObject start, CityObject goal) {
-		// gets the bird-distance from start to goal
 		int xDiff = goal.getXPos() - start.getXPos();
 		int yDiff = goal.getYPos() - start.getYPos();
 		return Math.sqrt(yDiff*yDiff + xDiff*xDiff);
@@ -135,20 +199,12 @@ public class KNAStar extends PathFinder{
 	
 	@Override
 	public ArrayList<CityObject> getPath() {
-	//	System.out.println("returned a path from A* with size" + path.size());
 		return path;
 	}
 	
 	
 	@Override
-	public void initialize(CityObject start, CityObject goal) {
-		path.clear();
-	}
-	
-	
-	@Override
 	public ArrayList<CityObject> getDebugData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -159,6 +215,9 @@ public class KNAStar extends PathFinder{
 		getMap().updateCrossings(location);
 		calculatePath(location, goal);
 	}
-	
-	
+
+	@Override
+	public void initialize(CityObject locationRef, CityObject goalRef) {
+		// TODO Auto-generated method stub
+	}
 }

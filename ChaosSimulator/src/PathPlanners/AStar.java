@@ -9,19 +9,14 @@ import WorldClasses.LongRoad;
 public class AStar extends PathFinder{
 
 	private ArrayList<CityObject> path = new ArrayList<CityObject>();
-	private CityObject goal = null;
+//	private CityObject goal = null;
+	private int totalExploredNodesForAllPaths = 0;
 	
-	public int nrExploredNodes = 0;
-	
-	//observe that the start and goal doesn't need to be crossings, make sure to handle this
 	public void calculatePath(CityObject start, CityObject goal) {
-//		System.out.println("");
-//		System.out.println("Calculates a new path with A*");
-//		System.out.println("Start id: "+ start.getId());
-//		System.out.println("Goal id: "+ goal.getId());
+		nrExploredNodes = 0;
 		this.goal = goal;
 		path.clear();
-//		
+
 		ArrayList<CityObject> closedSet = new ArrayList<>();
 		ArrayList<CityObject> openSet = new ArrayList<>();
 		HashMap<CityObject,CityObject> came_from = new HashMap<CityObject, CityObject>(); 
@@ -37,7 +32,6 @@ public class AStar extends PathFinder{
 			getMap().updateCrossings(goal);
 		}
 		
-		
 		/* -- here begins the real code of the A* algorithm -- */
 		openSet.add(start);
 		g_score.put(start, 0);
@@ -45,9 +39,8 @@ public class AStar extends PathFinder{
 		
 		while(!openSet.isEmpty()){
 			double lowestScore = Double.MAX_VALUE;
+			
 			for(CityObject node : openSet){
-				
-				nrExploredNodes++;
 				
 				if(f_score.get(node) < lowestScore){
 					lowestScore = f_score.get(node);
@@ -81,11 +74,14 @@ public class AStar extends PathFinder{
 	                f_score.put(neighbourCrossing, tentative_f_score);
 	                if(!openSet.contains(neighbourCrossing)){
 	                		openSet.add(neighbourCrossing);
+	        				nrExploredNodes++;
+	        				totalExploredNodesForAllPaths++;
 //	                		System.out.println("added a node to the openset");
 	                }
 				}
 			}
 		}
+		
 	}
 	
 	private void reconstruct_path(HashMap<CityObject,CityObject> came_from, CityObject current){
@@ -101,31 +97,32 @@ public class AStar extends PathFinder{
 		}
 	}
 
-
+	/**
+	 * returns the bird-distance from start to goal
+	 * @param start
+	 * @param goal
+	 * @return
+	 */
 	private double heuristic_cost(CityObject start, CityObject goal) {
-		// gets the bird-distance from start to goal
 		int xDiff = goal.getXPos() - start.getXPos();
 		int yDiff = goal.getYPos() - start.getYPos();
 		return Math.sqrt(yDiff*yDiff + xDiff*xDiff);
 	}
 
-	//TODO implement in PathFinder instead
 	@Override
 	public ArrayList<CityObject> getPath() {
-//		System.out.println("returned a path from A* with size" + path.size());
 		return path;
 	}
 
 
 	@Override
-	public void initialize(CityObject start, CityObject goal) {
+	public void resetLocalVariables() {
 		path.clear();
 	}
 
 
 	@Override
 	public ArrayList<CityObject> getDebugData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -135,5 +132,11 @@ public class AStar extends PathFinder{
 		getMap().updateWithBlockedRoad(blockedRoad);
 		getMap().updateCrossings(location);
 		calculatePath(location, goal);
+	}
+
+	@Override
+	public void initialize(CityObject locationRef, CityObject goalRef) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -223,5 +223,11 @@ public class RTAStar extends PathFinder {
 		backtrackTo(secondBestCrossing);
 
 	}
+
+	@Override
+	public void resetLocalVariables() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

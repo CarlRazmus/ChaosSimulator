@@ -57,7 +57,7 @@ public class BredthFirst extends PathFinder {
 	}
 
 	@Override
-	public void initialize(CityObject start, CityObject goal) {
+	public void resetLocalVariables() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -70,6 +70,12 @@ public class BredthFirst extends PathFinder {
 
 	@Override
 	public void handleBlockade(CityObject blockedRoad, CityObject location) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void initialize(CityObject locationRef, CityObject goalRef) {
 		// TODO Auto-generated method stub
 		
 	}
