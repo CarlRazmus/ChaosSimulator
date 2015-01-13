@@ -57,18 +57,7 @@ public class AStar extends PathFinder{
 
 			/* reconstruct path */ 
 			if(current.getId() == goal.getId()){
-//				System.out.println("Found a optimal path to the goal-node");
-				CityObject from = came_from.get(current);
-				
-				while(from != null){
-					//get the path to current from its predeccessor, exluding the predeccessor.
-					LongRoad pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
-					path.addAll(0, pathToCurrent.getPath());
-					current = from;
-					from = came_from.get(current);
-					path.remove(0);
-				}
-//				System.out.println("The optimal path is: " + path);
+				reconstruct_path(came_from, current);
 				return;
 			}
 			
@@ -96,6 +85,19 @@ public class AStar extends PathFinder{
 	                }
 				}
 			}
+		}
+	}
+	
+	private void reconstruct_path(HashMap<CityObject,CityObject> came_from, CityObject current){
+		CityObject from = came_from.get(current);
+		
+		while(from != null){
+			//get the path to current from its predeccessor, exluding the predeccessor.
+			LongRoad pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
+			path.addAll(0, pathToCurrent.getPath());
+			current = from;
+			from = came_from.get(current);
+			path.remove(0);
 		}
 	}
 

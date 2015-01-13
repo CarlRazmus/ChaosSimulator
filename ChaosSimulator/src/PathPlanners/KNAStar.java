@@ -39,6 +39,9 @@ public class KNAStar extends PathFinder{
 		path.clear();
 	}
 	
+	/**
+	 * analyzes the map structure to define best values for the variables k and n
+	 */
 	private void analyzeMapStructure(){
 		
 	}
@@ -50,24 +53,16 @@ public class KNAStar extends PathFinder{
 
 	@Override
 	public void calculatePath(CityObject start, CityObject goal) {
-		/* iterate K times 
-		 * 		build up a  list of available paths with the length of the paths and also a value for the bird-distance to the goal
-		 * 		return N steps of the path with best G-score	
-			 */
-		
-		initialize();
+		CityObject current = null;
 		this.goal = goal;
 		
-		
-		CityObject current = null;
+		initialize();
 		
 		/* the start and goal might be something other than a crossing, update the crossingsMap accordingly */
-		if(!getMap().getNodes().contains(start)){
+		if(!getMap().getNodes().contains(start))
 			getMap().updateCrossings(start);
-		}
-		if(!getMap().getNodes().contains(goal)){
+		if(!getMap().getNodes().contains(goal))
 			getMap().updateCrossings(goal);
-		}
 		
 		
 		/* -- here begins the real code of the A* algorithm -- */
@@ -85,22 +80,10 @@ public class KNAStar extends PathFinder{
 				}
 				nrExploredNodes++;
 			}
-	
-			//TODO MAKE A FUNCTION FOR THIS
+
 			/* reconstruct path if goal has been found*/ 
 			if(current.getId() == goal.getId()){
-	//			System.out.println("Found a optimal path to the goal-node");
-				CityObject from = came_from.get(current);
-				
-				while(from != null){
-					//get the path to current from its predeccessor, exluding the predeccessor.
-					LongRoad pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
-					path.addAll(0, pathToCurrent.getPath());
-					current = from;
-					from = came_from.get(current);
-					path.remove(0);
-				}
-	//			System.out.println("The optimal path is: " + path);
+				reconstruct_path(came_from, current);
 				return;
 			}
 			
@@ -130,6 +113,18 @@ public class KNAStar extends PathFinder{
 		}
 	}
 	
+	private void reconstruct_path(HashMap<CityObject,CityObject> came_from, CityObject current){
+		CityObject from = came_from.get(current);
+		
+		while(from != null){
+			//get the path to current from its predeccessor, exluding the predeccessor.
+			LongRoad pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
+			path.addAll(0, pathToCurrent.getPath());
+			current = from;
+			from = came_from.get(current);
+			path.remove(0);
+		}
+	}
 	
 	private double heuristic_cost(CityObject start, CityObject goal) {
 		// gets the bird-distance from start to goal
