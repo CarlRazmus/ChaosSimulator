@@ -143,7 +143,9 @@ public class KNAStar extends PathFinder{
 		}
 
 		backTrack(current, false);
-		System.out.println("KNAStar (" + nrExploredNodes + ")");
+		
+//		System.out.println("KNAStar (" + nrExploredNodes + ")");
+		
 	}
 	
 //	private void reconstruct_path(HashMap<CityObject,CityObject> came_from, CityObject current){

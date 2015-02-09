@@ -25,6 +25,7 @@ public class CrossingsMap {
 
 
 	private void addCrossing(CityObject road){
+		System.out.println("adding a new road to the crossings map " + road.getId());
 		neighbourCrossings.put(road, new ArrayList<LongRoad>());
 		crossings.add(road);
 	}
@@ -52,7 +53,7 @@ public class CrossingsMap {
 	}
 	
 	public void updateCrossings(CityObject newRoad){
-//		System.out.println("updates the crossingsMap with a new crossing");
+		System.out.println("updates the crossingsMap with a new crossing " + newRoad.getId());
 		if(crossings.contains(newRoad))
 			return;
 		
@@ -220,6 +221,7 @@ public class CrossingsMap {
 		for(CityObject crossing : crossings){
 			addCrossing(crossing);
 		}
+		System.out.println("done initializing the CrossingsMap\n");
 	}
 	
 	public void removeTempNodes(){

@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import AI.Agent;
 import AI.FireFighter;
 import AI.PoliceCar;
+import Behaviours.RandomCrossingMovement;
 import Behaviours.RandomMovement;
 import PathPlanners.AStar;
 import PathPlanners.CrossingsMap;
@@ -20,7 +21,7 @@ import WorldClasses.CityObject;
 import debug.InformationWindow;
 
 
-
+//TODO should make this a singleton just for the sake of it. 
 public class Simulator extends JFrame implements KeyListener {
 	
 	private static final long serialVersionUID = 1L;
@@ -36,10 +37,15 @@ public class Simulator extends JFrame implements KeyListener {
 	private final int NR_POLICE_CARS = 1;
 	private final int NR_FIRE_BRIGADES = 1;
 	
+	
+	
+	
 	public static void main(String[] args) {
 		Simulator simulator = new Simulator();
 		simulator.initialize();
-	}	
+	}
+	
+	
 	
 	/**
 	 * creates all the agents that is used when the application is started (more can be added dynamically under runtime)
@@ -65,7 +71,7 @@ public class Simulator extends JFrame implements KeyListener {
 				continue;
 			}
 			for(CityObject o : Simulator.model.getRoads().get(value).getNeighbours()){
-				//dont add the goal if is neigbor with a crossing
+				//don't add the goal if it's a neighbor with a crossing
 				if(Simulator.model.getCrossings().contains(o)){
 					goals.remove(Simulator.model.getRoads().get(value));
 					System.out.println("didnt add goal: goal was neighbor to a crossing");
@@ -77,7 +83,7 @@ public class Simulator extends JFrame implements KeyListener {
 					System.out.println("didnt add goal: was neighbor to a already existing goal");
 					break;
 				}
-			}//1674
+			}
 		}
 	}
 	
@@ -110,28 +116,31 @@ public class Simulator extends JFrame implements KeyListener {
 	
 	private void addPoliceCar(){
 		PoliceCar pc = new PoliceCar();
-		RandomMovement policeCarRandomMovement = new RandomMovement();
-		policeCarRandomMovement.setList(goals);
+		
+		RandomCrossingMovement policeCarRandomMovement = new RandomCrossingMovement(reader.getCrossings());
+		policeCarRandomMovement.addAgentID(pc.getId());
 		pc.setMovementBehavior(policeCarRandomMovement);
+
 		pc.setPathFinder(new KNAStar(70,50));
 		pc.getPathFinder().setMap(generateCrossingsMap());
-		pc.setLocation(model.getRoads().get(0));
-
-		pc.getPathFinder().getMap().checkCrossingCorruption();
+		
+		pc.setLocation(model.getCrossings().get(0));
+//		pc.setLocation(model.getRoads().get(0));
 
 		agents.add(pc);
 	}
 	
 	private void addFireBrigade(){
 		FireFighter fb = new FireFighter();
-		RandomMovement fireBrigadeRandomMovement = new RandomMovement();
-		fireBrigadeRandomMovement.setList(goals);
+		RandomCrossingMovement  fireBrigadeRandomMovement = new RandomCrossingMovement(reader.getCrossings());
+		fireBrigadeRandomMovement.addAgentID(fb.getId());
 		fb.setMovementBehavior(fireBrigadeRandomMovement);
+		
 		fb.setPathFinder(new KNAStar(70,50));
 		fb.getPathFinder().setMap(generateCrossingsMap());
-		fb.setLocation(model.getRoads().get(0));
-
-		fb.getPathFinder().getMap().checkCrossingCorruption();
+		
+		fb.setLocation(model.getCrossings().get(0));
+//		fb.setLocation(model.getRoads().get(0));
 		
 		agents.add(fb);
 	}
@@ -212,26 +221,12 @@ public class Simulator extends JFrame implements KeyListener {
 		}
 	}
 
-//	ArrayList<Agent> removeList = new ArrayList<Agent>();
 	
 	/**
 	 * Handles all the procedures that needs to be updated in the simulator
 	 */
 	public void simulate(){
-//		for (Agent agent : agents){
-//				agent.think();
-//				if(!agent.isOnline()){
-//					removeList.add(agent);
-//					System.out.println("agent is offline and is removed");
-//				}
-//		}
-//		
-//		if(!removeList.isEmpty()){
-//			for (Agent agent : removeList){
-//				agents.remove(agent);
-//			}
-//			removeList.clear();
-//		}
+		//currently, nothing needs to be updated from the simulator class
 	}
 
 	private void blockRoadsInit(){
