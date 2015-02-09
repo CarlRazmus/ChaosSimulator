@@ -2,7 +2,7 @@ package AI;
 
 import java.awt.Color;
 
-public class PoliceCar extends Agent {
+public class PoliceCar extends Agent{
 
 	public PoliceCar() {
 		super(Color.BLUE);
@@ -11,7 +11,18 @@ public class PoliceCar extends Agent {
 	public PoliceCar(Color color) {
 		super(color);
 	}
-	
+//	
+//	@Override
+//	public void run() {
+//		//only perform 1 think() every second
+//		while(isOnline){
+//			if(System.currentTimeMillis() > time + 1000){
+//				think();
+//				time = System.currentTimeMillis();
+//			}
+//		}
+//	}
+//	
 	@Override
 	public void think() {
 		if(pathFinder.getMap().checkCrossingCorruption())
@@ -48,7 +59,7 @@ public class PoliceCar extends Agent {
 			if(location.getId() == target.getId())
 				setTarget(null);
 			
-			else if(atEndOfPath()){
+			else if(isAtEndOfPath()){
 				pathFinder.calculatePath(location, target);
 				setPath(pathFinder.getPath());
 			}

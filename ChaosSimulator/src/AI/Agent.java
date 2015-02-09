@@ -7,32 +7,41 @@ import WorldClasses.CityObject;
 import WorldClasses.Road;
 import Behaviours.MovementBehavior;
 
-public abstract class Agent extends CityObject {
+public abstract class Agent extends CityObject implements Runnable{
 	protected MovementBehavior movementBehavior;
 	protected PathFinder pathFinder;
 	protected CityObject target;
 	protected CityObject location;
 	protected ArrayList<CityObject> path;
 	private int positionIndex = 1;
+	protected long time;
 	
 	protected int nrTraversedNodes = 0;
-	private Color color;
 	protected boolean isOnline = true;
 	
-	// abstract methods
+	
 	public abstract void think();
 
 	
 	public Agent(Color color){
-		this.color = color;
+		super(color);
 	}
 	
 
-
-//	public Agent(MovementBehavior movementBehavior, CityObject location) {
-//		this.movementBehavior = movementBehavior;
-//		this.location = location;
-//	}
+	/**
+	 * as long as the agent is online, the function think() is run every 1 second
+	 */
+	@Override
+	public void run() {
+		while(true){
+			if(isOnline){
+				if(System.currentTimeMillis() > time + 2){
+					think();
+					time = System.currentTimeMillis();
+				}
+			}
+		}
+	}
 
 	public void moveTo(CityObject nextLocation) {
 		this.location = nextLocation;
@@ -40,6 +49,8 @@ public abstract class Agent extends CityObject {
 	
 	public void move(){
 		CityObject nextLocation = path.get(positionIndex);
+		
+		//TODO check if nextLocation is a neighbor to the currentLocation, if not, then throw an Exception
 		
 		/* check if the road that we want to move to is blocked (or occupied?) */ 
 		if(nextLocation.isBlocked() && nextLocation instanceof Road){
@@ -56,12 +67,12 @@ public abstract class Agent extends CityObject {
 		}
 	}
 	
-	//TODO add all errorcorrection to Agent instead of having it in FireFighter
 	public void reportBadPath(){
 		setTarget(null);
 		setPath(null);
 	}
-	public boolean atEndOfPath(){
+	
+	public boolean isAtEndOfPath(){
 //		System.out.println("atEndOfPath "+ positionIndex +"/"+path.size());
 		if(positionIndex == path.size())
 			return true;
@@ -69,7 +80,7 @@ public abstract class Agent extends CityObject {
 	}
 	
 
-	// getters & setters
+	//       getters & setters   //
 	public MovementBehavior getMovementBehavior() {
 		return movementBehavior;
 	}
@@ -115,9 +126,7 @@ public abstract class Agent extends CityObject {
 		return nrTraversedNodes;
 	}
 
-
-	public boolean isOnline() {
-		// TODO Auto-generated method stub
+	public boolean getIsOnline() {
 		return isOnline;
 	}
 }

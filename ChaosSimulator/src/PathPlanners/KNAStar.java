@@ -111,10 +111,9 @@ public class KNAStar extends PathFinder{
 				}
 			}
 
-			/* reconstruct path if goal has been found*/ 
+			/* reconstruct path if goal has been found */ 
 			if(current.getId() == goal.getId()){
 				backTrack(current, true);
-//				System.out.println("found the goal! returns the whole path to it");
 				System.out.println("KNAStar " + totalNrExploredNodes + " in openset for " + goal.getId());
 				return;
 			}
@@ -147,18 +146,18 @@ public class KNAStar extends PathFinder{
 		System.out.println("KNAStar (" + nrExploredNodes + ")");
 	}
 	
-	private void reconstruct_path(HashMap<CityObject,CityObject> came_from, CityObject current){
-		CityObject from = came_from.get(current);
-		
-		while(from != null){
-			//get the path to current from its predeccessor, exluding the predeccessor.
-			LongRoad pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
-			path.addAll(0, pathToCurrent.getPath());
-			current = from;
-			from = came_from.get(current);
-			path.remove(0);
-		}
-	}
+//	private void reconstruct_path(HashMap<CityObject,CityObject> came_from, CityObject current){
+//		CityObject from = came_from.get(current);
+//		
+//		while(from != null){
+//			//get the path to current from its predeccessor, exluding the predeccessor.
+//			LongRoad pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
+//			path.addAll(0, pathToCurrent.getPath());
+//			current = from;
+//			from = came_from.get(current);
+//			path.remove(0);
+//		}
+//	}
 	
 	public void backTrack(CityObject current, boolean goalFound){
 		CityObject from = came_from.get(current);

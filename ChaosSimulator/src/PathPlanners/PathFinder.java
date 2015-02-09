@@ -2,12 +2,12 @@ package PathPlanners;
 import java.util.ArrayList;
 
 import WorldClasses.CityObject;
-import WorldClasses.CrossingsMap;
 
 
 public abstract class PathFinder {
-	private CrossingsMap map;
 	protected int nrExploredNodes = 0;
+	
+	private CrossingsMap map;
 	protected CityObject goal = null;
 	protected CityObject start = null;
 	

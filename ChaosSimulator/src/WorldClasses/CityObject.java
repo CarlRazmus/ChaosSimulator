@@ -30,8 +30,14 @@ public class CityObject {
 	
 	public CityObject(){
 		initializeStuff();
+		setDefaultColor();
 	}
 	
+	private void setDefaultColor() {
+		color = Color.BLACK;
+		originalColor = Color.BLACK;
+	}
+
 	public CityObject(Color color){
 		this.color = color;
 		this.originalColor = color;
@@ -43,8 +49,8 @@ public class CityObject {
 		this.y = y;
 		this.color = color;
 		this.originalColor = color;
-		xPos = x*Camera.scale;
-		yPos = y*Camera.scale;
+		xPos = x*Camera.SCALE;
+		yPos = y*Camera.SCALE;
 		initializeStuff();
 	}
 	
@@ -64,17 +70,17 @@ public class CityObject {
 	
 	public void setX(int x){
 		this.x = x;
-		this.xPos = x*Camera.scale;
+		this.xPos = x*Camera.SCALE;
 	}
 	
 	public void setY(int y){
 		this.y = y;
-		this.yPos = y*Camera.scale;
+		this.yPos = y*Camera.SCALE;
 	}
 	
 	public void updatePos(){
-		xPos = x*Camera.scale;
-		yPos = y*Camera.scale;
+		xPos = x*Camera.SCALE;
+		yPos = y*Camera.SCALE;
 	}
 	
 	public ArrayList<CityObject> getNeighbours() {

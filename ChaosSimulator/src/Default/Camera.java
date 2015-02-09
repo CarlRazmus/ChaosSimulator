@@ -13,58 +13,75 @@ import WorldClasses.Road;
 
 public class Camera extends JComponent {
 	private static final long serialVersionUID = 1L;
+	
+	public static int SCALE = 5;
+	public static final int BASIC_MODE = 1;
+	public static final int ROUND_MODE = 2;
 
 	private WorldModel model;
 	private ArrayList<Agent> agents;
 	
-	public static int scale = 3;
 	private int x = 0;
 	private int y = 0;
-	long time;
+	private int mode = BASIC_MODE;
 	
 	
-	
-	public Camera(){
-		
-	}
 	
 	public void zoomIn(){
-		scale++;
+		SCALE++;
 		model.updateScaleOnObjects();
 	}
 	public void zoomOut(){
-		scale--;
+		SCALE--;
 		model.updateScaleOnObjects();
 	}
 	
 	public void moveRight(){
-		x += scale;
+		x += 3*SCALE;
 	}
 	public void moveLeft(){
-		x -= scale;
+		x -= 3*SCALE;
 	}
 	public void moveUp(){
-		y -= scale;
+		y -= 3*SCALE;
 	}
 	public void moveDown(){
-		y += scale;
+		y += 3*SCALE;
 	}
-	public Camera(ArrayList<Agent> agents){
-		this.agents = agents;
+
+	//TODO define different paintingModes (create classes for the different modes if you create new modes)
+	public void paint(Graphics g){
+		switch (mode) {
+		case BASIC_MODE:
+			paintSimpleGraphics(g);
+			break;
+		case ROUND_MODE:
+			paintRoundGraphics(g);
+			break;
+		default:
+			break;
+		}
 	}
 	
-	public void paint(Graphics g){
-		//*
+	/**
+	 * just a dummy function, only created to show the general idea behind the different painting modes
+	 * @param g
+	 */
+	private void paintRoundGraphics(Graphics g) {
+		
+	}
+
+	private void paintSimpleGraphics(Graphics g){
 		Color oldColor = g.getColor();
 		g.setColor(Color.DARK_GRAY);
 		for (Building o : model.getBuildings()){
 			for(CityObject child : o.getBlocks())
-				g.fillRect(x + child.getXPos(), y + child.getYPos(), scale, scale);
+				g.fillRect(x + child.getXPos(), y + child.getYPos(), SCALE, SCALE);
 		}
 		g.setColor(Color.LIGHT_GRAY);
 		for (Road road : model.getRoads()){
 				g.setColor(road.getColor());
-				g.fillRect(x + road.getXPos(), y + road.getYPos(), scale, scale);
+				g.fillRect(x + road.getXPos(), y + road.getYPos(), SCALE, SCALE);
 		}
 		
 		for(Agent agent : agents){
@@ -82,21 +99,20 @@ public class Camera extends JComponent {
 			}*/
 			if(agent.getTarget() != null){	
 				g.setColor(Color.green);
-				g.fillRect(x + agent.getTarget().getXPos(), y + agent.getTarget().getYPos(), scale, scale);
+				g.fillRect(x + agent.getTarget().getXPos(), y + agent.getTarget().getYPos(), SCALE, SCALE);
 			}
 			g.setColor(agent.getColor());
-			g.fillRoundRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), scale + 10, scale + 10, 20, 20);
+			g.fillRoundRect(x + agent.getLocation().getXPos(), y + agent.getLocation().getYPos(), SCALE + 10, SCALE + 10, 20, 20);
 //			g.fillRect(x + agent.getXPos(), y + agent.getYPos(), scale, scale);
 		}
 		debug(g);
 		g.setColor(oldColor);
-		//*/
 	}
+	
 	
 	private void debug(Graphics g){
 //		g.drawString(Integer.toString(agent.getTarget().getId()), agent.getTarget().getX() * Simulator.SCALE + 5, agent.getTarget().getY() * Simulator.SCALE);
 		debugCrossings(g);
-//		debugCrossingsNeighbours(g);
 	}
 
 	/* show all crossings on the map */
@@ -106,23 +122,6 @@ public class Camera extends JComponent {
 			g.drawString(Integer.toString(cross.getId()), x + cross.getXPos() + 5, y + cross.getYPos());
 	}
 
-	/* show all crossings neighbour crossings 
-//	private void debugCrossingsNeighbours(Graphics g){
-//		if(count == model.getCrossings().size())
-//			count = 0;
-//		if(time == 0)
-//			time = System.currentTimeMillis();
-//		CityObject road = model.getCrossings().get(count);
-//		
-//		g.setColor(Color.blue);
-//		g.fillRect(road.getX(), road.getY(), SCALE, SCALE);
-//		
-//		if(System.currentTimeMillis() > time + 2500){
-//			count++;
-//			time = System.currentTimeMillis();
-//		}
-//	}
-	*/
 
 	public void setModel(WorldModel model) {
 		this.model = model;

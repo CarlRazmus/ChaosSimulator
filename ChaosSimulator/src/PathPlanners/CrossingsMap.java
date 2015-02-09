@@ -1,6 +1,10 @@
-package WorldClasses;
+package PathPlanners;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import WorldClasses.CityObject;
+import WorldClasses.LongRoad;
+import WorldClasses.Road;
 
 
 public class CrossingsMap {
@@ -162,7 +166,7 @@ public class CrossingsMap {
 		for(CityObject o : crossings){
 			for(LongRoad lr : neighbourCrossings.get(o)){
 				if(lr.getPath().size() == 0){
-					System.out.print("crossing " + o.getId() + " ");
+					System.out.print("corrupted crossing " + o.getId() + " ");
 					return true;
 				}
 			}
@@ -303,3 +307,4 @@ public class CrossingsMap {
 	
 	
 }
+
