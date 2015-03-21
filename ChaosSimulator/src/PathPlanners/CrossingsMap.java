@@ -2,7 +2,11 @@ package PathPlanners;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.omg.CosNaming.NamingContextPackage.NotFound;
+
+import Default.Helper;
 import WorldClasses.CityObject;
+import WorldClasses.Crossing;
 import WorldClasses.LongRoad;
 import WorldClasses.Road;
 
@@ -11,109 +15,151 @@ public class CrossingsMap {
 	
 	/* NOTE!!  a crossing can be a building since sometimes the goal of a path might be a building   */ 
 	
-	public HashMap<CityObject, ArrayList<LongRoad>> neighbourCrossings = new HashMap<CityObject, ArrayList<LongRoad>>();
-	public ArrayList<CityObject> crossings = new ArrayList<>();
-	private ArrayList<CityObject> resetCrossingsList = new ArrayList<>();
-	private ArrayList<CityObject> blockedRoads = new ArrayList<>();
-	
-	
-	
-	
-	public ArrayList<CityObject> getResetCrossingsList() {
-		return resetCrossingsList;
-	}
+	public ArrayList<Crossing> crossings = new ArrayList<Crossing>();
+	private ArrayList<Crossing> fakeCrossings = new ArrayList<Crossing>();
 
-
-	private void addCrossing(CityObject road){
-		System.out.println("adding a new road to the crossings map " + road.getId());
-		neighbourCrossings.put(road, new ArrayList<LongRoad>());
-		crossings.add(road);
-	}
 	
 	
-	public void updateWithBlockedRoad(CityObject blockedRoad){
-		System.out.println("updates the neighbourCrossings with a blocked road");
-		
-		/* check if the road is a crossing */
-		if(crossings.contains(blockedRoad))
-			System.out.println("the road that was blocked was a crossing");
-		
-		ArrayList<CityObject> visited = new ArrayList<>();
-		
-		//1. find the two crossings(can be a single crossing too) that the new node intercepts
-		visited.add(blockedRoad);
-		blockedRoads.add(blockedRoad);
-		for(CityObject neighbour : blockedRoad.getNeighbours()){
-			if(neighbour instanceof Road){
-				CityObject crossing = checkForRoad(neighbour, visited);
-				neighbourCrossings.put(crossing, new ArrayList<LongRoad>());
-				findCrossingNeighbours(crossing);
+	
+	private String debugString = "";
+	
+	public void createDebugString(){
+		String lastDebugString = debugString;
+		debugString = "";
+		for(Crossing c : crossings){
+			debugString += "Crossing " + c.getRoad().getId() + "\n   ";
+			for(LongRoad lr : c.getNeighbourCrossings()){
+				if(!isCrossing(lr.getEnd()))
+					System.out.println("crossing " + c.getRoad().getId() + " has a corrupted LongRoad now");
+				if(!isCrossing(lr.getStart()))
+					System.out.println("crossing " + c.getRoad().getId() + " has a corrupted LongRoad now");
+				debugString += lr.getEnd().getId() + ", ";
 			}
+			debugString += "\n";	
 		}
+		
+		if(lastDebugString!= "")
+			if(!lastDebugString.equals(debugString))
+				System.out.println("Map is not the same as before!!");
 	}
 	
-	public void updateCrossings(CityObject newRoad){
-		System.out.println("updates the crossingsMap with a new crossing " + newRoad.getId());
-		if(crossings.contains(newRoad))
+	public void printDebugString(){
+		System.out.println(debugString);
+	}
+	
+	
+	
+	
+
+	private void addCrossing(Crossing crossing){
+//		System.out.println("adding a new road to the crossings map " + road.getId());
+		crossings.add(crossing);
+	}
+	
+	
+	public boolean isCrossing(CityObject road){
+		for(Crossing c : crossings)
+			if(c.getRoad().getId() == road.getId())
+				return true;
+		return false;
+	}
+	
+	public void updateWithBlockedRoad(CityObject blockedRoad) throws Exception{
+		System.out.println("road (id=" + blockedRoad.getId() + ") was blocked, updates neighbour Crossings with new neighbourArrayLists");
+		
+		if(!blockedRoad.isBlocked())
+			throw new Exception();
+		
+		/* check if the road is a crossing, if yes then reset its neighbor list */
+		if(isCrossing(blockedRoad))
+			getCrossing(blockedRoad.getId()).getNeighbourCrossings().clear();
+		
+		recalculateAllNeighborCrossings(blockedRoad);
+	}
+	
+	public Crossing getCrossing(int id) throws NotFound{
+		for(Crossing c : crossings)
+			if(c.getRoad().getId() == id)
+				return c;
+		
+		throw new NotFound();
+	}
+	
+	public void addTemporaryCrossing(CityObject road){
+//		System.out.println("updates the crossingsMap with a new crossing " + road.getId());
+		
+		if(!Helper.assertRoad(road)) return;
+		
+		if(isCrossing(road)){
+//			System.out.println("tried to add an already existing crossing");
 			return;
-		
-		addCrossing(newRoad);
-		
-		ArrayList<CityObject> visited = new ArrayList<>();
-		
-		//1. find the two crossings(can be a single crossing too) that the new node intercepts
-		visited.add(newRoad);
-		resetCrossingsList.add(newRoad); //getResetCrossingsList().add(newRoad);
-		findCrossingNeighbours(newRoad);
-		for(CityObject neighbour : newRoad.getNeighbours()){
-			if(neighbour instanceof Road){
-				CityObject crossing = checkForRoad(neighbour, visited);
-				if(crossing == null)
-					continue;
-				neighbourCrossings.put(crossing, new ArrayList<LongRoad>());
-				findCrossingNeighbours(crossing);
-			}
 		}
-	}
-
-	private CityObject checkForRoad(CityObject crossing, ArrayList<CityObject> visited) {
-		boolean deadEnd = false;
 		
-		while(deadEnd == false){
-			deadEnd = true;
+		Crossing fakeCrossing = new Crossing(road);
+		addCrossing(fakeCrossing);
+
+		fakeCrossings.add(fakeCrossing);
+		findCrossingNeighbours(fakeCrossing);
+		
+		recalculateAllNeighborCrossings(road);
+		
+		checkCrossingCorruption();
+	}
+	
+	
+	private void recalculateAllNeighborCrossings(CityObject road){
+				
+		//update neighbor-lists of all crossings that are connected to the road/crossing
+		for(CityObject neighbourRoad : road.getNeighbours()){
 			
-			for(CityObject o : crossings){
-				if(o.getId() == crossing.getId())
-					return o;
-			}
-			
-			for(CityObject n : crossing.getNeighbours())
-				if(n instanceof Road && !visited.contains(n)){
-					deadEnd = false;
-					visited.add(crossing);
-					crossing = n;
-					break;
+			if(neighbourRoad instanceof Road){
+				try{
+					Crossing neighborCrossing = checkForCrossing(road, neighbourRoad);				
+					findCrossingNeighbours(neighborCrossing);
 				}
+				catch(Exception e){
+				}
+			}
 		}
-		return null;
-	}
-		
-	public void findCrossingsNeighbours(){
-		for(CityObject crossing : crossings)
-			findCrossingNeighbours(crossing);
 	}
 
-	private void findCrossingNeighbours(CityObject crossing){
-		for(CityObject neighbour : crossing.getNeighbours())
+	private Crossing checkForCrossing(CityObject road, CityObject neighbour ) throws NotFound {
+		if(neighbour.isBlocked()) throw new NotFound();
+		
+		if(isCrossing(neighbour))
+			return getCrossing(neighbour.getId());
+		
+		for(CityObject o : neighbour.getNeighbours())
+			if(o instanceof Road && o != road)
+				return checkForCrossing(neighbour, o);	
+		
+		throw new NotFound();
+	}
+		
+	public void initializeCrossingsNeighbours(){
+		for(Crossing c : crossings)
+			findCrossingNeighbours(c);
+	}
+
+	private void findCrossingNeighbours(Crossing crossing){
+		CityObject road = crossing.getRoad();
+		
+		crossing.getNeighbourCrossings().clear();
+		
+		for(CityObject neighbour : road.getNeighbours())
 			if(neighbour instanceof Road){
 				//finds a longroad to the nearest crossing (if it exists)
-				LongRoad longRoad = findNearestCrossing(crossing, neighbour);
-				if(longRoad != null)
+				try{
+					LongRoad longRoad = checkForLongRoad(road, neighbour);
 					addNeighbour(crossing, longRoad);
+				}
+				catch(Exception e){
+					
+				}
 			}
 	}
 	
-	private LongRoad findNearestCrossing(CityObject start, CityObject firstRoad){
+	private LongRoad checkForLongRoad(CityObject start, CityObject firstRoad) throws Exception{
 		LongRoad longRoad = new LongRoad();
 		CityObject recentlyVisited = start;
 		CityObject currentRoad = firstRoad;
@@ -122,18 +168,15 @@ public class CrossingsMap {
 		longRoad.addRoad(start);
 		
 		while(true){
-			if(blockedRoads.contains(currentRoad))
-				return null;
+			if(currentRoad.isBlocked()) throw new Exception();
 			
 			found = false;
 			longRoad.addRoad(currentRoad);
-			for(CityObject o : crossings){
-				if(o.getId() == currentRoad.getId())
+			
+			for(Crossing c : crossings)
+				if(c.getRoad().getId() == currentRoad.getId())
 					return longRoad;
-			}
-//			if(nodes.contains(currentRoad)){
-//				return longRoad;
-//			}
+
 			for(CityObject neighbour : currentRoad.getNeighbours()){
 				if(neighbour instanceof Road && neighbour != recentlyVisited){
 					recentlyVisited = currentRoad;
@@ -142,32 +185,29 @@ public class CrossingsMap {
 					break;
 				}
 			}
-			if(!found){
-//				System.out.println("Dead End");
-				return null;
-			}
+			
+			if(!found) throw new Exception();				
 		}
 	}
 	
 
 	
-	public LongRoad getLongRoad(Integer id1, Integer id2){
-		CityObject crossing1 = getCrossing(id1);
-		CityObject crossing2 = getCrossing(id2);
+	public LongRoad getLongRoad(int id1, int id2) throws NotFound{
+		Crossing crossing1 = getCrossing(id1);
+		Crossing crossing2 = getCrossing(id2);
 		
-		if(crossing1 == null || crossing2 == null)
-			System.out.println("nodes didnt contain node 1 or 2");
-		for(LongRoad lr : neighbourCrossings.get(crossing1))
-			if(lr.getEnd().getId() == crossing2.getId())
+		for(LongRoad lr : crossing1.getNeighbourCrossings())
+			if(lr.getEnd().getId() == crossing2.getRoad().getId())
 				return lr;
-		return null;
+		
+		throw new NotFound();
 	}
 	
 	public boolean checkCrossingCorruption(){
-		for(CityObject o : crossings){
-			for(LongRoad lr : neighbourCrossings.get(o)){
+		for(Crossing o : crossings){
+			for(LongRoad lr : o.getNeighbourCrossings()){
 				if(lr.getPath().size() == 0){
-					System.out.print("corrupted crossing " + o.getId() + " ");
+					System.out.print("corrupted crossing " + o.getRoad().getId());
 					return true;
 				}
 			}
@@ -175,35 +215,18 @@ public class CrossingsMap {
 		return false;
 	}
 	
-	private void addNeighbour(CityObject road, LongRoad crossingNeighbour){
-		if(neighbourCrossings.containsKey(road))
-			neighbourCrossings.get(road).add(crossingNeighbour);
+	
+	private void addNeighbour(Crossing crossing, LongRoad neighbourPath){
+		crossing.getNeighbourCrossings().add(neighbourPath);
 	}
 	
-	public ArrayList<CityObject> getNeighbourCrossings(Integer crossingID){
-		ArrayList<CityObject> roadList = new ArrayList<>();
-		CityObject crossing = getCrossing(crossingID);
-		
-		if(crossing == null)
-			return null;
-		
-		for(LongRoad longRoad : neighbourCrossings.get(crossing)){
-			if(longRoad.getPath().size() > 0)
-				roadList.add(longRoad.getEnd());
-		}
-		return roadList;
-	}
 	
-	public int distanceBtwnCrossings(int startID, int goalID){
-		CityObject start = getCrossing(startID);
-		CityObject goal = getCrossing(goalID);
+	public int distanceBtwnCrossings(int startID, int goalID) throws NotFound{
+		Crossing start = getCrossing(startID);
+		CityObject goal = getCrossing(goalID).getRoad();
 		
-		if(start == null || goal == null){
-			System.out.println("ERROR MESSAGE: one of the nodes wasn't a crossing");
-			return 0;
-		}
 	
-		ArrayList<LongRoad> longRoadList = neighbourCrossings.get(start);
+		ArrayList<LongRoad> longRoadList = start.getNeighbourCrossings();
 		for(LongRoad longRoad : longRoadList)
 			if(longRoad.getEnd() == goal){
 				return longRoad.getDistance();
@@ -213,100 +236,47 @@ public class CrossingsMap {
 		return 0;
 	}
 	
-	public ArrayList<CityObject> getNodes(){
+	public ArrayList<Crossing> getNodes(){
 		return crossings;
 	}
 	
 	public void setCrossings(ArrayList<Road> crossings){
-		for(CityObject crossing : crossings){
+		for(CityObject road : crossings){
+			Crossing crossing = new Crossing(road);
 			addCrossing(crossing);
 		}
 		System.out.println("done initializing the CrossingsMap\n");
 	}
 	
 	public void removeTempNodes(){
-		for(CityObject crossing : getResetCrossingsList()){
+//		System.out.println("removes temporary nodes");
+		for(Crossing crossing : fakeCrossings){
 			removeNode(crossing);	
 		}
-		getResetCrossingsList().clear();
+		fakeCrossings.clear();
 	}		
 	
-	/* remove the node and calculates values for the neigbours of that node again  */
-	public void removeNode(CityObject node){	
-//		nodes.remove(node);
-		removeNode(node.getId());
-		removeNeighbourCrossings(node.getId());
-//		neighbourCrossings.remove(node);
+	/* removes the node and calculates values for the neigbours of that node again  */
+	private void removeNode(Crossing node){	
+		CityObject road = node.getRoad();
+
+		crossings.remove(node);
 		
-		CityObject crossing1 = null;
-		CityObject crossing2 = null;
-		ArrayList<CityObject> visited = new ArrayList<>();
+		recalculateAllNeighborCrossings(road);
 		
-		//1. find the two crossings(can be a single crossing too) that the new node intercepts
-		visited.add(node);
-		for(CityObject neighbour : node.getNeighbours()){
-			if(neighbour instanceof Road){
-				if(crossing1 == null)
-					crossing1 = neighbour;
-				else
-					crossing2 = neighbour;
-			}
-		}
-		if(crossing1 != null)
-			crossing1 = checkForRoad(crossing1, visited);
-		
-		if(crossing2 != null)
-			crossing2 = checkForRoad(crossing2, visited);
-		
-		//2. remove the old values from the crossings and update them with new ones.
-		if(crossing1 != null){
-			neighbourCrossings.put(crossing1, new ArrayList<LongRoad>());
-			findCrossingNeighbours(crossing1);
-		}
-		
-		if(crossing2 != null){
-			neighbourCrossings.put(crossing2, new ArrayList<LongRoad>());
-			findCrossingNeighbours(crossing2);
-		}
+		checkCrossingCorruption();
 	}
 	
-	public CityObject getCrossing(int id){
-		for(CityObject o : crossings){
-			if(o.getId() == id)
-				return o;
-		}
-		return null;
-	}
 	
-	public void removeNode(int id){
-		ArrayList<CityObject> remove = new ArrayList<>();
-		for(CityObject o : crossings)
-			if(o.getId() == id)
-				remove.add(o);
-		for(CityObject o : remove)
-			crossings.remove(o);
-	}
 	
-	public ArrayList<CityObject> getNeighbourCrossings(int id){
-		for(CityObject o : neighbourCrossings.keySet())
-			if(o.getId() == id){
-				ArrayList<CityObject> list = new ArrayList<>();
-				for(LongRoad lr : neighbourCrossings.get(o))
-					list.add(lr.getEnd());
-				return list;
-			}
-		return null;
+	public ArrayList<Crossing> getNeighbourCrossings(int id) throws NotFound{
+		ArrayList<Crossing> output = new ArrayList<Crossing>();
+
+		for(LongRoad lr : getCrossing(id).getNeighbourCrossings())
+			output.add(getCrossing(lr.getEnd().getId()));
+		
+		return output;
 	}
-	
-	public void removeNeighbourCrossings(int id){
-		ArrayList<CityObject> remove = new ArrayList<>();
-		for(CityObject o : neighbourCrossings.keySet())
-			if(o.getId() == id)
-				remove.add(o);
-		for(CityObject o : remove)
-			neighbourCrossings.remove(o);
-	}
-	
 	
 }
 

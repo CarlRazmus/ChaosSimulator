@@ -35,7 +35,7 @@ public abstract class Agent extends CityObject implements Runnable{
 	public void run() {
 		while(true){
 			if(isOnline){
-				if(System.currentTimeMillis() > time + 2){
+				if(System.currentTimeMillis() > time + 1){
 					think();
 					time = System.currentTimeMillis();
 				}

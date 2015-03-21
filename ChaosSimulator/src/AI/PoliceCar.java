@@ -34,7 +34,6 @@ public class PoliceCar extends Agent{
 				isOnline = false;
 				return;
 			}
-		
 			pathFinder.resetLocalVariables();
 			pathFinder.calculatePath(getLocation(), getTarget());
 			
@@ -45,17 +44,13 @@ public class PoliceCar extends Agent{
 		else if(path == null)
 			reportBadPath();
 		
-		else if(path.isEmpty()){
-//			setTarget(null);
-			System.out.println("path was empty, tries to calculate a new path");
+		else if(path.isEmpty()){ //TODO remove this???
+			System.out.println("path did not go all the way to the goal, tries to calculate a new path");
 			pathFinder.calculatePath(location, target);
 			setPath(pathFinder.getPath());
-			
-			//only report badPath when no path has been returned at all, a path could end up as bad but still exist
-			//reportBadPath();
-			
 		}
 		else{
+			//if the goal has been reached
 			if(location.getId() == target.getId())
 				setTarget(null);
 			

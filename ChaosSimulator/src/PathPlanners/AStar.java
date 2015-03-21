@@ -2,6 +2,8 @@ package PathPlanners;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.omg.CosNaming.NamingContextPackage.NotFound;
+
 import WorldClasses.CityObject;
 import WorldClasses.LongRoad;
 
@@ -26,10 +28,10 @@ public class AStar extends PathFinder{
 		
 		/* the start and goal might be something other than a crossing, update the crossingsMap accordingly */
 		if(!getMap().getNodes().contains(start)){
-			getMap().updateCrossings(start);
+			getMap().addTemporaryCrossing(start);
 		}
 		if(!getMap().getNodes().contains(goal)){
-			getMap().updateCrossings(goal);
+			getMap().addTemporaryCrossing(goal);
 		}
 		
 		/* -- here begins the real code of the A* algorithm -- */
@@ -57,28 +59,32 @@ public class AStar extends PathFinder{
 			openSet.remove(current);
 			closedSet.add(current);
 			
-			for(LongRoad longRoad : getMap().neighbourCrossings.get(current)) {
-				CityObject neighbourCrossing = longRoad.getEnd();
-				int tentative_g_score = g_score.get(current) + getMap().distanceBtwnCrossings(current.getId(), neighbourCrossing.getId());
-				double tentative_f_score = tentative_g_score + heuristic_cost(neighbourCrossing, goal);
+			try {
+				for(LongRoad longRoad : getMap().getCrossing(current.getId()).getNeighbourCrossings()){
+					CityObject neighbourCrossing = longRoad.getEnd();
+					int tentative_g_score = g_score.get(current) + getMap().distanceBtwnCrossings(current.getId(), neighbourCrossing.getId());
+					double tentative_f_score = tentative_g_score + heuristic_cost(neighbourCrossing, goal);
 
-				if((closedSet.contains(neighbourCrossing) && tentative_f_score >= f_score.get(neighbourCrossing))){
-//					System.out.println("aborted with continue");
-					continue;
+					if((closedSet.contains(neighbourCrossing) && tentative_f_score >= f_score.get(neighbourCrossing))){
+						continue;
+					}
+						
+					if(!openSet.contains(neighbourCrossing) || tentative_f_score < f_score.get(neighbourCrossing)){
+						
+						came_from.put(neighbourCrossing, current);
+				        g_score.put(neighbourCrossing, tentative_g_score);
+				        f_score.put(neighbourCrossing, tentative_f_score);
+				        
+				        if(!openSet.contains(neighbourCrossing)){
+				        	openSet.add(neighbourCrossing);
+							nrExploredNodes++;
+							totalExploredNodesForAllPaths++;
+				        }
+					}
 				}
-					
-				if(!openSet.contains(neighbourCrossing) || tentative_f_score < f_score.get(neighbourCrossing)){
-//					System.out.println("didnt abort");
-					came_from.put(neighbourCrossing, current);
-	                g_score.put(neighbourCrossing, tentative_g_score);
-	                f_score.put(neighbourCrossing, tentative_f_score);
-	                if(!openSet.contains(neighbourCrossing)){
-	                		openSet.add(neighbourCrossing);
-	        				nrExploredNodes++;
-	        				totalExploredNodesForAllPaths++;
-//	                		System.out.println("added a node to the openset");
-	                }
-				}
+			} catch (NotFound e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		
@@ -88,12 +94,19 @@ public class AStar extends PathFinder{
 		CityObject from = came_from.get(current);
 		
 		while(from != null){
-			//get the path to current from its predeccessor, exluding the predeccessor.
-			LongRoad pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
-			path.addAll(0, pathToCurrent.getPath());
-			current = from;
-			from = came_from.get(current);
-			path.remove(0);
+			LongRoad pathToCurrent;
+			
+			try {
+				pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
+				path.addAll(0, pathToCurrent.getPath());
+				current = from;
+				from = came_from.get(current);
+				path.remove(0);
+			} 
+			catch (NotFound e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -129,8 +142,12 @@ public class AStar extends PathFinder{
 
 	@Override
 	public void handleBlockade(CityObject blockedRoad, CityObject location) {
-		getMap().updateWithBlockedRoad(blockedRoad);
-		getMap().updateCrossings(location);
+		try {
+			getMap().updateWithBlockedRoad(blockedRoad);
+		} catch (Exception e) {
+			System.out.println("road was not blocked but told Map System that is was blocked! not okey!");
+		}
+		getMap().addTemporaryCrossing(location);
 		calculatePath(location, goal);
 	}
 

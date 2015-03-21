@@ -34,7 +34,7 @@ public class Simulator extends JFrame implements KeyListener {
 	private ArrayList<Agent> agents;
 
 	private ArrayList<CityObject> goals;
-	private final int NR_POLICE_CARS = 1;
+	private final int NR_POLICE_CARS = 0;
 	private final int NR_FIRE_BRIGADES = 1;
 	
 	
@@ -86,26 +86,7 @@ public class Simulator extends JFrame implements KeyListener {
 			}
 		}
 	}
-	
 
-	private void generateRandomCrossingsGoals(){
-		goals = new ArrayList<CityObject>();
-		
-		System.out.println(Simulator.model.getCrossings().size());
-		
-		Random random = new Random();
-		for(int i = 0; i < ((int)Simulator.model.getCrossings().size()/4); i++){
-			int value = random.nextInt(Simulator.model.getCrossings().size());
-			
-			goals.add(Simulator.model.getCrossings().get(value));
-			
-			if(Simulator.model.getCrossings().get(value).getNeighbours().size() == 1){
-				goals.remove(Simulator.model.getCrossings().get(value));
-				System.out.println("didnt add goal: goal only had 1 neighbour");
-				continue;
-			}
-		}
-	}
 	
 	
 	private void startAgentThreads(){
@@ -117,30 +98,36 @@ public class Simulator extends JFrame implements KeyListener {
 	private void addPoliceCar(){
 		PoliceCar pc = new PoliceCar();
 		
-		RandomCrossingMovement policeCarRandomMovement = new RandomCrossingMovement(reader.getCrossings());
+//		RandomCrossingMovement policeCarRandomMovement = new RandomCrossingMovement(reader.getCrossings());
+//		policeCarRandomMovement.addAgentID(pc.getId());
+		
+		RandomMovement policeCarRandomMovement = new RandomMovement();
 		policeCarRandomMovement.addAgentID(pc.getId());
 		pc.setMovementBehavior(policeCarRandomMovement);
 
 		pc.setPathFinder(new KNAStar(70,50));
 		pc.getPathFinder().setMap(generateCrossingsMap());
 		
-		pc.setLocation(model.getCrossings().get(0));
-//		pc.setLocation(model.getRoads().get(0));
+//		pc.setLocation(model.getCrossings().get(0));
+		pc.setLocation(model.getRoads().get(0));
 
 		agents.add(pc);
 	}
 	
 	private void addFireBrigade(){
 		FireFighter fb = new FireFighter();
-		RandomCrossingMovement  fireBrigadeRandomMovement = new RandomCrossingMovement(reader.getCrossings());
+//		RandomCrossingMovement  fireBrigadeRandomMovement = new RandomCrossingMovement(reader.getCrossings());		
+//		fireBrigadeRandomMovement.addAgentID(fb.getId());
+		
+		RandomMovement  fireBrigadeRandomMovement = new RandomMovement();
 		fireBrigadeRandomMovement.addAgentID(fb.getId());
 		fb.setMovementBehavior(fireBrigadeRandomMovement);
 		
-		fb.setPathFinder(new KNAStar(70,50));
+		fb.setPathFinder(new RTAStar());
 		fb.getPathFinder().setMap(generateCrossingsMap());
 		
-		fb.setLocation(model.getCrossings().get(0));
-//		fb.setLocation(model.getRoads().get(0));
+//		fb.setLocation(model.getCrossings().get(0));
+		fb.setLocation(model.getRoads().get(0));
 		
 		agents.add(fb);
 	}
@@ -148,7 +135,7 @@ public class Simulator extends JFrame implements KeyListener {
 	private CrossingsMap generateCrossingsMap(){
 		CrossingsMap map = new CrossingsMap();
 		map.setCrossings(reader.getCrossings());
-		map.findCrossingsNeighbours();
+		map.initializeCrossingsNeighbours();
 		return map;
 	}
 	
@@ -180,8 +167,8 @@ public class Simulator extends JFrame implements KeyListener {
 		
 		initializeLocalVariables();
 		
-//		generateRandomGoals();
-		generateRandomCrossingsGoals();
+		generateRandomGoals();
+//		generateRandomCrossingsGoals();
 		
 		createAgents();
 		startAgentThreads();

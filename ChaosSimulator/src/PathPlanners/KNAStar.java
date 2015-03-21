@@ -2,6 +2,8 @@ package PathPlanners;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.omg.CosNaming.NamingContextPackage.NotFound;
+
 import WorldClasses.CityObject;
 import WorldClasses.LongRoad;
 
@@ -87,11 +89,14 @@ public class KNAStar extends PathFinder{
 
 		softReset();
 		
+		getMap().createDebugString();
+//		getMap().printDebugString();
+		
 		/* the start and goal might be something other than a crossing, update the crossingsMap accordingly */
-		if(!getMap().getNodes().contains(start))
-			getMap().updateCrossings(start);
-		if(!getMap().getNodes().contains(goal))
-			getMap().updateCrossings(goal);
+		if(!getMap().isCrossing(start))
+			getMap().addTemporaryCrossing(start);
+		if(!getMap().isCrossing(goal))
+			getMap().addTemporaryCrossing(goal);
 		
 		openSet.add(start);
 		g_score.put(start, 0);
@@ -114,31 +119,37 @@ public class KNAStar extends PathFinder{
 			/* reconstruct path if goal has been found */ 
 			if(current.getId() == goal.getId()){
 				backTrack(current, true);
-				System.out.println("KNAStar " + totalNrExploredNodes + " in openset for " + goal.getId());
+//				System.out.println("KNAStar " + totalNrExploredNodes + " in openset for " + goal.getId());
 				return;
 			}
 			
 			openSet.remove(current);
 			closedSet.add(current);
 			
-			for(LongRoad longRoad : getMap().neighbourCrossings.get(current)) {
-				CityObject neighbourCrossing = longRoad.getEnd();
-				int tentative_g_score = g_score.get(current) + getMap().distanceBtwnCrossings(current.getId(), neighbourCrossing.getId());
-				double tentative_f_score = tentative_g_score + heuristic_cost(neighbourCrossing, goal);
-	
-				if((closedSet.contains(neighbourCrossing) && tentative_f_score >= f_score.get(neighbourCrossing)))
-					continue;
-					
-				if(!openSet.contains(neighbourCrossing) || tentative_f_score < f_score.get(neighbourCrossing)){
-					came_from.put(neighbourCrossing, current);
-	                g_score.put(neighbourCrossing, tentative_g_score);
-	                f_score.put(neighbourCrossing, tentative_f_score);
-	                if(!openSet.contains(neighbourCrossing)){
-	                		openSet.add(neighbourCrossing);
-	                		nrExploredNodes++;
-	                		totalNrExploredNodes++;
-	                }
+			try {
+				for(LongRoad longRoad : getMap().getCrossing(current.getId()).getNeighbourCrossings()) {
+					CityObject neighbourCrossing = longRoad.getEnd();
+					int tentative_g_score = g_score.get(current) + getMap().distanceBtwnCrossings(current.getId(), neighbourCrossing.getId());
+					double tentative_f_score = tentative_g_score + heuristic_cost(neighbourCrossing, goal);
+
+					if((closedSet.contains(neighbourCrossing) && tentative_f_score >= f_score.get(neighbourCrossing)))
+						continue;
+						
+					if(!openSet.contains(neighbourCrossing) || tentative_f_score < f_score.get(neighbourCrossing)){
+						came_from.put(neighbourCrossing, current);
+				        g_score.put(neighbourCrossing, tentative_g_score);
+				        f_score.put(neighbourCrossing, tentative_f_score);
+				        if(!openSet.contains(neighbourCrossing)){
+				        		openSet.add(neighbourCrossing);
+				        		nrExploredNodes++;
+				        		totalNrExploredNodes++;
+				        }
+					}
 				}
+			} 
+			catch (NotFound e) {
+				e.printStackTrace();
+				resetLocalVariables();
 			}
 		}
 
@@ -148,40 +159,35 @@ public class KNAStar extends PathFinder{
 		
 	}
 	
-//	private void reconstruct_path(HashMap<CityObject,CityObject> came_from, CityObject current){
-//		CityObject from = came_from.get(current);
-//		
-//		while(from != null){
-//			//get the path to current from its predeccessor, exluding the predeccessor.
-//			LongRoad pathToCurrent = getMap().getLongRoad(from.getId(), current.getId());
-//			path.addAll(0, pathToCurrent.getPath());
-//			current = from;
-//			from = came_from.get(current);
-//			path.remove(0);
-//		}
-//	}
-	
 	public void backTrack(CityObject current, boolean goalFound){
 		CityObject from = came_from.get(current);
 		ArrayList<LongRoad> longRoads = new ArrayList<LongRoad>();
 		
-		while(from != null){
-			//gets the path to current from its predeccessor, exluding the predeccessor.
-			longRoads.add(getMap().getLongRoad(from.getId(), current.getId()));
-			current = from;
-			from = came_from.get(current);
-		}
-
-		int size = longRoads.size();
-
-		for(int i = 1; i <= size; i++){
-			ArrayList<CityObject> subPath = longRoads.get(size - i).getPath();
-			subPath.remove(0);
-			path.addAll(subPath);
-			if(i >= n && !goalFound){
-//				System.out.println("returns a shorter path");
-				return;
+		try {
+			while(from != null){
+				longRoads.add(getMap().getLongRoad(from.getId(), current.getId()));
+				current = from;
+				from = came_from.get(current);	
 			}
+	
+			int size = longRoads.size();
+	
+			//TODO return full longRoad path instead and handle the path in each planner instead
+			for(int i = 1; i <= size; i++){
+				for(int k = 1; k < longRoads.get(size - i).getPath().size(); k++){
+					path.add(longRoads.get(size - i).getPath().get(k));
+				}
+				
+				if(i >= n && !goalFound){
+					getMap().removeTempNodes();
+					return;
+				}
+			}	
+			getMap().removeTempNodes();
+		}
+		
+		catch (NotFound e) {
+			e.printStackTrace();
 		}
 //		System.out.println("returns the complete path");
 	}
@@ -212,9 +218,16 @@ public class KNAStar extends PathFinder{
 	
 	@Override
 	public void handleBlockade(CityObject blockedRoad, CityObject location) {
-		getMap().updateWithBlockedRoad(blockedRoad);
-		getMap().updateCrossings(location);
-		calculatePath(location, goal);
+		try{
+			getMap().updateWithBlockedRoad(blockedRoad);
+			resetLocalVariables();
+			getMap().addTemporaryCrossing(location);
+			calculatePath(location, goal);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			resetLocalVariables();
+		}
 	}
 
 	@Override
